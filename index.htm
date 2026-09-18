@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>乌可EUCO | 画师作品主页</title>
+<style>
+/* ============================================================
+   基础
+   ============================================================ */
+:root{
+  --bg:#f3f3f1;
+  --surface:#ffffff;
+  --ink:#111111;
+  --ink-2:#4a4a4a;
+  --ink-3:#8a8a8a;
+  --line:#d6d6d2;
+  --line-strong:#111111;
+  --hover:#e8e8e4;
+  --nav-w:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  overflow-x:hidden;
+  font-feature-settings:"tnum" 1;
+}
+.zh{display:block;font-weight:700;letter-spacing:.02em;line-height:1.25}
+.en{display:block;font-weight:400;font-size:.72em;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-top:.4em;line-height:1.35}
+
+/* ============================================================
+   页面渐变过渡
+   ============================================================ */
+#fadeOverlay{
+  position:fixed;inset:0;background:var(--bg);z-index:800;
+  opacity:1;pointer-events:auto;
+  transition:opacity .42s ease;
+}
+#fadeOverlay:not(.on){opacity:0;pointer-events:none}
+
+/* ============================================================
+   左侧竖列导航
+   ============================================================ */
+.sidenav{
+  position:fixed;top:0;left:0;bottom:0;width:var(--nav-w);
+  z-index:500;pointer-events:none;visibility:hidden;
+}
+.sidenav.show{pointer-events:auto;visibility:visible}
+.nav-bg{
+  position:absolute;inset:0;background:var(--surface);
+  border-right:1px solid var(--line-strong);
+  transform:scaleY(0);transform-origin:top center;
+}
+.sidenav.show .nav-bg{animation:bgSweepY .78s cubic-bezier(.65,0,.35,1) forwards}
+@keyframes bgSweepY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+
+.nav-inner{
+  position:relative;height:100%;
+  display:flex;flex-direction:column;
+  padding-top:34px;opacity:0;
+  transition:opacity .4s ease .45s;
+}
+.sidenav.show .nav-inner{opacity:1}
+
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:26px 12px;border:none;border-bottom:1px solid var(--line);
+  background:transparent;font-family:inherit;color:var(--ink);
+  cursor:pointer;transition:background .22s ease;width:100%;
+}
+.nav-item:hover{background:var(--hover)}
+.nav-item .nav-zh{font-size:13px;font-weight:700;letter-spacing:.14em;line-height:1}
+.nav-item .nav-en{
+  font-size:8.5px;font-weight:400;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-3);
+  margin-top:8px;line-height:1;transition:color .22s ease;
+}
+.nav-item:hover .nav-en{color:var(--ink-2)}
+
+.nav-group{position:relative}
+.cat-menu{
+  max-height:0;overflow:hidden;background:#fafaf8;
+  border-bottom:1px solid var(--line);
+  transition:max-height .48s cubic-bezier(.4,0,.2,1);
+}
+.nav-group:hover .cat-menu{max-height:520px}
+.cat-menu a{
+  display:block;padding:16px 14px 16px 26px;
+  border-bottom:1px solid var(--line);
+  color:var(--ink);text-decoration:none;cursor:pointer;
+  transition:background .2s ease;
+}
+.cat-menu a:last-child{border-bottom:none}
+.cat-menu a:hover{background:var(--hover)}
+.cat-menu a .zh{font-size:11px;font-weight:600;letter-spacing:.02em;line-height:1.3}
+.cat-menu a .en{font-size:7px;letter-spacing:.13em;margin-top:5px;color:var(--ink-3);line-height:1.3}
+
+.nav-foot{
+  margin-top:auto;padding:24px 20px;
+  border-top:1px solid var(--line);text-align:center;
+}
+.nav-foot .zh{
+  font-size:9px;font-weight:500;letter-spacing:.24em;
+  color:var(--ink-3);text-transform:uppercase;
+}
+
+/* ============================================================
+   视图
+   ============================================================ */
+.view{display:none}
+.view.active{display:block}
+#view-index,#view-detail{margin-left:var(--nav-w);min-height:100vh}
+
+/* ============================================================
+   首页
+   ============================================================ */
+#view-home.active{display:block;min-height:100vh}
+.home-frame{
+  max-width:1200px;margin:0 auto;
+  padding:56px 64px 72px;min-height:100vh;
+  display:flex;flex-direction:column;
+}
+.home-bar{
+  display:flex;align-items:center;gap:18px;
+  padding-bottom:18px;border-bottom:1px solid var(--line-strong);
+  font-size:10px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;
+}
+.home-bar .num{color:var(--ink);font-weight:700;letter-spacing:.14em}
+.home-bar .sep{flex:1;height:1px;background:var(--line)}
+
+.home-hero{
+  flex:1;display:flex;flex-direction:column;
+  justify-content:center;padding:72px 0 64px;
+}
+#artistId{transform-origin:left center;will-change:transform,opacity,filter}
+#artistId .zh{
+  font-size:clamp(2.4rem,7.8vw,6.2rem);
+  font-weight:800;
+  letter-spacing:-.01em;
+  line-height:.98;
+}
+.hero-tag{margin-top:34px}
+.hero-tag .zh{font-size:14px;font-weight:600;color:var(--ink-2);letter-spacing:.08em}
+.hero-tag .en{font-size:9px;letter-spacing:.26em;margin-top:8px}
+
+.home-socials{
+  display:flex;flex-wrap:wrap;
+  border-top:1px solid var(--line-strong);
+  border-left:1px solid var(--line);
+  margin-bottom:56px;width:100%;
+}
+.social-link{
+  flex:1 1 0;min-width:0;padding:22px 18px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  color:var(--ink);text-decoration:none;
+  transition:background .22s ease;display:block;
+}
+.social-link:hover{background:var(--hover)}
+.social-link .zh{font-size:13px;font-weight:700;letter-spacing:.04em}
+.social-link .en{font-size:8.5px;letter-spacing:.16em;margin-top:7px}
+
+.home-cats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  width:100%;border-top:1px solid var(--line-strong);
+  border-left:1px solid var(--line);
+}
+.cat-card{
+  aspect-ratio:1;border:none;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:transparent;font-family:inherit;color:var(--ink);
+  cursor:pointer;padding:32px 30px;
+  display:flex;flex-direction:column;
+  justify-content:space-between;align-items:flex-start;
+  text-align:left;transition:background .25s ease;overflow:hidden;
+}
+.cat-card:hover{background:var(--hover)}
+.cat-num{
+  font-size:11px;font-weight:700;letter-spacing:.22em;
+  color:var(--ink-3);transition:color .25s ease;
+}
+.cat-card:hover .cat-num{color:var(--ink)}
+.cat-label .zh{font-size:clamp(12px,1.3vw,17px);font-weight:700;letter-spacing:.03em;line-height:1.3}
+.cat-label .en{font-size:9px;letter-spacing:.15em;margin-top:10px;line-height:1.5}
+
+body.intro #artistId{animation:idSeq 2.8s cubic-bezier(.22,.9,.24,1) .15s both}
+@keyframes idSeq{
+  0%{opacity:0;transform:scale(1.7);filter:blur(14px)}
+  26%{opacity:1;transform:scale(1.7);filter:blur(0)}
+  58%{opacity:1;transform:scale(1.7)}
+  100%{opacity:1;transform:scale(1)}
+}
+body.intro .hero-tag{animation:fadeUp .8s ease 2.7s both}
+body.intro .home-socials{animation:fadeUp .8s ease 2.95s both}
+body.intro .home-cats{animation:fadeUp .8s ease 3.25s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============================================================
+   Index 页
+   ============================================================ */
+#view-index{padding:56px 64px 96px}
+.head-row{
+  display:flex;align-items:center;gap:18px;
+  padding-bottom:16px;border-bottom:1px solid var(--line-strong);
+  font-size:10px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;
+}
+.head-row .num{color:var(--ink);font-weight:700;letter-spacing:.14em}
+
+.page-title{margin-top:44px}
+.page-title .zh{font-size:clamp(1.7rem,3.6vw,2.7rem);font-weight:800;letter-spacing:.01em;line-height:1.15}
+.page-title .en{font-size:10px;letter-spacing:.34em;margin-top:14px}
+
+.subtabs{
+  position:relative;display:flex;flex-wrap:wrap;
+  margin-top:38px;
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+  width:fit-content;
+}
+.subtab-slider{
+  position:absolute;top:1px;left:1px;
+  height:calc(100% - 2px);
+  background:var(--ink);
+  transition:transform .48s cubic-bezier(.4,0,.2,1),
+             width .48s cubic-bezier(.4,0,.2,1),
+             opacity .25s ease;
+  z-index:1;pointer-events:none;opacity:0;
+}
+.subtab{
+  position:relative;z-index:2;
+  padding:15px 26px;
+  border:none;border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:transparent;font-family:inherit;cursor:pointer;
+  transition:background .22s ease;
+  text-align:left;min-width:120px;
+}
+.subtab .zh{font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink);transition:color .35s ease}
+.subtab .en{font-size:8px;letter-spacing:.15em;margin-top:6px;color:var(--ink-3);transition:color .35s ease}
+.subtab:hover:not(.active){background:var(--hover)}
+.subtab.active .zh{color:var(--surface)}
+.subtab.active .en{color:rgba(255,255,255,.6)}
+
+/* 工具栏 */
+.toolbar{
+  display:flex;align-items:stretch;
+  margin-top:34px;
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+  width:fit-content;flex-wrap:wrap;
+}
+.tool-label{
+  padding:15px 24px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--surface);
+  display:flex;align-items:center;
+}
+.sort-wrap{position:relative;display:flex;align-items:stretch}
+.sort-slider{
+  position:absolute;top:0;left:0;height:100%;
+  background:var(--ink);
+  transition:transform .48s cubic-bezier(.4,0,.2,1),
+             width .48s cubic-bezier(.4,0,.2,1),
+             opacity .25s ease;
+  z-index:1;pointer-events:none;opacity:0;
+}
+.sort-wrap button{
+  position:relative;z-index:2;
+  padding:12px 28px 13px;
+  border:none;border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:transparent;font-family:inherit;
+  cursor:pointer;
+  transition:background .22s ease;
+  display:flex;flex-direction:column;align-items:flex-start;
+  text-align:left;
+}
+.sort-wrap button .zh{
+  font-size:12px;font-weight:600;letter-spacing:.06em;
+  line-height:1.2;color:var(--ink-3);
+  transition:color .35s ease;
+  white-space:nowrap;
+}
+.sort-wrap button .en{
+  font-size:8px;font-weight:400;letter-spacing:.15em;
+  text-transform:uppercase;line-height:1;
+  margin-top:5px;color:var(--ink-3);
+  transition:color .35s ease;
+  white-space:nowrap;
+}
+.sort-wrap button:hover:not(.active){background:var(--hover)}
+.sort-wrap button:hover:not(.active) .zh{color:var(--ink)}
+.sort-wrap button.active .zh{color:var(--surface)}
+.sort-wrap button.active .en{color:rgba(255,255,255,.55)}
+
+.search-wrap{
+  display:flex;align-items:center;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:var(--surface);padding:0 20px;
+  min-width:260px;transition:background .22s ease;
+}
+.search-wrap:focus-within{background:#fbfbf9}
+.search-wrap .s-icon{font-size:10px;color:var(--ink-3);letter-spacing:.1em;margin-right:12px;flex-shrink:0}
+.search-wrap input{
+  border:none;outline:none;background:transparent;
+  font-family:inherit;font-size:12.5px;font-weight:500;
+  color:var(--ink);letter-spacing:.04em;
+  padding:16px 0;width:100%;
+}
+.search-wrap input::placeholder{color:#b8b8b3;letter-spacing:.08em;font-weight:400}
+
+.grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:58px 28px;margin-top:64px;
+}
+@media(max-width:1280px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.grid{grid-template-columns:1fr;gap:48px}}
+
+.card{cursor:pointer;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.card:hover{transform:translateY(-5px)}
+.card .thumb{
+  aspect-ratio:1;border:1px solid var(--line);
+  display:grid;place-items:center;overflow:hidden;
+  transition:border-color .3s ease;background:var(--surface);
+  position:relative;
+}
+.card:hover .thumb{border-color:var(--ink)}
+.card .thumb .ph{
+  font-size:clamp(30px,3.6vw,46px);font-weight:800;
+  color:rgba(17,17,17,.82);letter-spacing:.04em;line-height:1;
+}
+.card .thumb img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .5s cubic-bezier(.2,.8,.2,1);
+}
+.card:hover .thumb img{transform:scale(1.04)}
+
+.card-meta{padding-top:18px}
+.card-title .zh{font-size:15px;font-weight:700;letter-spacing:.02em;line-height:1.35}
+.card-title .en{font-size:8.5px;letter-spacing:.16em;margin-top:7px}
+.card-char{margin-top:14px}
+.card-char .zh{font-size:12.5px;font-weight:500;color:var(--ink-2);letter-spacing:.04em}
+.card-char .en{font-size:8px;letter-spacing:.14em;margin-top:6px;color:#a4a4a0}
+.card-date{margin-top:14px;font-size:11px;font-weight:400;letter-spacing:.1em;color:var(--ink-3)}
+.empty{
+  grid-column:1/-1;text-align:center;color:var(--ink-3);
+  padding:100px 0;font-size:12px;letter-spacing:.24em;text-transform:uppercase;
+}
+
+/* ============================================================
+   详情页
+   ============================================================ */
+#view-detail{padding:0;min-height:100vh}
+#view-detail.active{display:flex}
+
+.detail-layout{display:flex;width:100%;min-height:100vh;align-items:stretch}
+
+.detail-panel{
+  width:0;overflow:hidden;background:var(--surface);
+  border-right:1px solid var(--line-strong);
+  flex-shrink:0;position:relative;
+}
+.detail-panel.expand{animation:panelExpand .95s cubic-bezier(.65,0,.35,1) forwards}
+@keyframes panelExpand{from{width:0}to{width:460px}}
+.detail-panel-inner{
+  width:460px;
+  padding:34px 46px 40px;
+  height:100%;display:flex;flex-direction:column;
+}
+
+.detail-title .zh{font-size:clamp(1.5rem,2.6vw,2.05rem);font-weight:800;letter-spacing:.01em;line-height:1.2}
+.detail-title .en{font-size:9.5px;letter-spacing:.3em;margin-top:15px}
+
+.detail-meta{margin-top:46px;border-top:1px solid var(--line)}
+.meta-item{padding:22px 0;border-bottom:1px solid var(--line)}
+.meta-item dt{
+  font-size:9px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;line-height:1.6;
+}
+.meta-item dd{margin-top:10px}
+.meta-item dd .zh{font-size:15px;font-weight:600;letter-spacing:.02em}
+.meta-item dd .en{font-size:9px;letter-spacing:.16em;margin-top:7px}
+
+.detail-links{
+  display:flex;
+  margin-top:38px;
+}
+.detail-links a{
+  flex:1;padding:22px 22px;
+  border:1px solid var(--line);border-right:none;
+  background:var(--surface);color:var(--ink);
+  text-decoration:none;transition:background .22s ease;display:block;
+}
+.detail-links a:last-child{border-right:1px solid var(--line)}
+.detail-links a:hover{background:var(--hover)}
+.detail-links a .zh{font-size:13px;font-weight:700;letter-spacing:.06em}
+.detail-links a .en{font-size:8.5px;letter-spacing:.18em;margin-top:8px}
+.no-source{
+  display:block;padding:22px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  font-size:11px;letter-spacing:.2em;
+  color:var(--ink-3);text-align:center;
+}
+
+.detail-stage{
+  flex:1;min-width:0;display:grid;place-items:center;
+  padding:56px;background:var(--bg);
+  cursor:pointer;
+}
+.detail-img{
+  max-width:100%;
+  max-height:calc(100vh - 160px);
+  border:1px solid var(--line-strong);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  cursor:zoom-in;position:relative;background:var(--surface);
+  transition:border-color .3s ease;
+  animation:imgIn .85s cubic-bezier(.2,.8,.2,1) both;
+}
+.detail-img:hover{border-color:var(--ink)}
+@keyframes imgIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+
+/* 有图时按原比例显示 */
+.detail-img img{
+  display:block;
+  max-width:100%;
+  max-height:calc(100vh - 160px);
+  width:auto;height:auto;
+  object-fit:contain;
+}
+
+/* 无图时的占位符才用正方形 */
+.detail-img .ph{
+  width:min(80vw,calc(100vh - 160px));
+  aspect-ratio:1;
+  display:grid;place-items:center;
+  font-size:clamp(60px,11vw,130px);font-weight:800;
+  color:rgba(17,17,17,.82);line-height:1;
+}
+.detail-img .hint{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:14px 20px;border-top:1px solid var(--line);
+  background:var(--surface);
+  font-size:9px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--ink-3);text-align:center;
+}
+
+@media(max-width:1024px){
+  .detail-stage{padding:36px}
+  .detail-img{width:min(100%,calc(100vh - 120px))}
+}
+@media(max-width:820px){
+  .detail-layout{flex-direction:column}
+  .detail-panel,
+  .detail-panel.expand{
+    animation:panelExpandSm .6s cubic-bezier(.65,0,.35,1) forwards;
+    border-right:none;border-bottom:1px solid var(--line-strong);
+  }
+  @keyframes panelExpandSm{from{width:100%;max-height:0}to{width:100%;max-height:1600px}}
+  .detail-panel-inner{width:100%;padding:28px 28px 36px}
+  .detail-stage{padding:28px}
+  .detail-img{width:100%}
+}
+
+/* ============================================================
+   全屏
+   ============================================================ */
+.lightbox{
+  position:fixed;inset:0;z-index:1000;background:#111;
+  display:none;place-items:center;cursor:zoom-out;padding:40px;
+}
+.lightbox.open{display:grid}
+.lightbox .lb-inner{
+  max-width:88vw;
+  max-height:88vh;
+  display:flex;align-items:center;justify-content:center;
+  animation:lbIn .42s cubic-bezier(.2,.8,.2,1) both;
+  overflow:hidden;
+}
+@keyframes lbIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+
+/* 有图时按原比例显示 */
+.lightbox .lb-inner img{
+  display:block;
+  max-width:88vw;
+  max-height:88vh;
+  width:auto;height:auto;
+  object-fit:contain;
+}
+
+/* 无图时占位符用正方形 */
+.lightbox .lb-inner .ph{
+  width:min(88vw,88vh);
+  aspect-ratio:1;
+  display:grid;place-items:center;
+  font-size:clamp(80px,18vw,200px);font-weight:800;
+  color:rgba(17,17,17,.85);line-height:1;
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+@media(max-width:1100px){:root{--nav-w:180px}}
+@media(max-width:820px){:root{--nav-w:150px}}
+@media(max-width:640px){
+  :root{--nav-w:110px}
+  .nav-item{padding:20px 6px}
+  .nav-item .nav-zh{font-size:11.5px;letter-spacing:.06em}
+  .nav-item .nav-en{font-size:7.5px;letter-spacing:.12em;margin-top:6px}
+  #view-index{padding:44px 24px 72px}
+  .home-frame{padding:40px 24px 56px}
+  .home-cats{grid-template-columns:1fr}
+  .cat-card{aspect-ratio:auto;padding:26px 24px;gap:22px}
+  .home-socials{border-left:none}
+  .social-link{flex:1 1 46%;min-width:0;border-left:1px solid var(--line)}
+  .toolbar{width:100%}
+  .sort-wrap{flex:1}
+  .sort-wrap button{flex:1;padding:11px 10px 12px}
+  .sort-wrap button .zh{font-size:11px}
+  .sort-wrap button .en{font-size:7px;letter-spacing:.1em}
+  .search-wrap{min-width:0;width:100%;order:9}
+  .subtabs{width:100%}
+  .subtab{flex:1;min-width:0;padding:13px 12px}
+  .subtab .zh{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div id="fadeOverlay" class="on"></div>
+
+<!-- ========== 左侧竖列导航 ========== -->
+<nav class="sidenav" id="sidenav">
+  <div class="nav-bg"></div>
+  <div class="nav-inner">
+
+    <button class="nav-item" data-action="home">
+      <span class="nav-zh">主页</span>
+      <span class="nav-en">Home</span>
+    </button>
+
+    <button class="nav-item" data-action="back">
+      <span class="nav-zh">返回</span>
+      <span class="nav-en">Back</span>
+    </button>
+
+    <div class="nav-group">
+      <button class="nav-item" style="border-bottom:none">
+        <span class="nav-zh">分类</span>
+        <span class="nav-en">Category</span>
+      </button>
+        <div class="cat-menu">
+        <a data-cat="all">
+          <span class="zh">全部作品</span>
+          <span class="en">All Works</span>
+        </a>
+        <a data-cat="idol">
+          <span class="zh">偶像类同人绘画</span>
+          <span class="en">Idol Doujin Illustration</span>
+        </a>
+        <a data-cat="game">
+          <span class="zh">游戏类同人绘画</span>
+          <span class="en">Game Doujin Illustration</span>
+        </a>
+        <a data-cat="other">
+          <span class="zh">其他</span>
+          <span class="en">Others</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav-foot">
+      <span class="zh">2020 — 2026</span>
+    </div>
+
+  </div>
+</nav>
+
+<!-- ========== 首页 ========== -->
+<section class="view active" id="view-home">
+  <div class="home-frame">
+
+    <div class="home-bar">
+      <span class="num">01</span>
+      <span>Portfolio / 作品集</span>
+      <span class="sep"></span>
+      <span>2020 — 2026</span>
+    </div>
+
+    <div class="home-hero">
+      <h1 id="artistId">
+        <span class="zh">乌可EUCO</span>
+      </h1>
+      <p class="hero-tag">
+        <span class="zh">插画师 / 同人创作者</span>
+        <span class="en">Illustrator &amp; Doujin Artist</span>
+      </p>
+    </div>
+
+    <div class="home-socials">
+      <a class="social-link" href="https://weibo.com/u/5581548764" target="_blank" rel="noopener">
+        <span class="zh">微博</span><span class="en">Weibo</span>
+      </a>
+      <a class="social-link" href="https://space.bilibili.com/23040664" target="_blank" rel="noopener">
+        <span class="zh">哔哩哔哩</span><span class="en">Bilibili</span>
+      </a>
+      <a class="social-link" href="https://x.com/Wuke_Euco" target="_blank" rel="noopener">
+        <span class="zh">X</span><span class="en">Twitter</span>
+      </a>
+      <a class="social-link" href="https://www.pixiv.net/users/22615456" target="_blank" rel="noopener">
+        <span class="zh">Pixiv</span><span class="en">Pixiv</span>
+      </a>
+      <a class="social-link" href="mailto:euco2020@163.com">
+        <span class="zh">邮箱</span><span class="en">euco2020@163.com</span>
+      </a>
+    </div>
+
+    <div class="home-cats" id="cats"></div>
+
+  </div>
+</section>
+
+<!-- ========== Index 页 ========== -->
+<section class="view" id="view-index">
+
+  <div class="head-row">
+    <span class="num">02</span>
+    <span>Index / 作品索引</span>
+  </div>
+
+  <h2 class="page-title">
+    <span class="zh" id="indexTitleZh"></span>
+    <span class="en" id="indexTitleEn"></span>
+  </h2>
+
+  <div class="subtabs" id="subTabs">
+    <div class="subtab-slider" id="subSlider"></div>
+  </div>
+
+  <div class="toolbar">
+    <span class="tool-label">排序 / Sort</span>
+    <div class="sort-wrap" id="sortWrap">
+      <div class="sort-slider" id="sortSlider"></div>
+      <button data-sort="date" class="active">
+        <span class="zh">创作时间</span>
+        <span class="en">Newest to Oldest</span>
+      </button>
+      <button data-sort="name">
+        <span class="zh">角色名排序</span>
+        <span class="en">A-Z</span>
+      </button>
+    </div>
+    <div class="search-wrap">
+      <span class="s-icon">搜索 /</span>
+      <input type="text" id="searchInput" placeholder="输入角色名 Search Character" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="grid" id="workGrid"></div>
+
+</section>
+
+<!-- ========== 详情页 ========== -->
+<section class="view" id="view-detail">
+  <div class="detail-layout">
+
+    <aside class="detail-panel" id="detailPanel">
+      <div class="detail-panel-inner">
+
+        <h2 class="detail-title">
+          <span class="zh" id="dTitleZh"></span>
+          <span class="en" id="dTitleEn"></span>
+        </h2>
+
+        <dl class="detail-meta">
+          <div class="meta-item">
+            <dt>角色 / Character</dt>
+            <dd>
+              <span class="zh" id="dCharZh"></span>
+              <span class="en" id="dCharEn"></span>
+            </dd>
+          </div>
+          <div class="meta-item">
+            <dt>创作时间 / Date</dt>
+            <dd>
+              <span class="zh" id="dDateZh"></span>
+              <span class="en" id="dDateEn"></span>
+            </dd>
+          </div>
+        </dl>
+
+        <div class="detail-links" id="dLinks"></div>
+
+      </div>
+    </aside>
+
+    <div class="detail-stage" id="detailStage">
+      <div class="detail-img" id="detailImg"></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox"></div>
+
+<script>
+/* ============================================================
+   1. 数据
+   ============================================================ */
+const CATS = [
+  {
+    key:'idol', zh:'偶像类同人绘画', en:'Idol Doujin Illustration', num:'01',
+    subs:[
+      { key:'imas',     zh:'THE iDOLM@STER', en:'The Idolmaster' },
+      { key:'bang',     zh:'BanG Dream!',    en:'Bang Dream!' },
+      { key:'lovelive', zh:'Love Live!',     en:'Love Live!' },
+      { key:'other',    zh:'其他',            en:'Others' }
+    ]
+  },
+  {
+    key:'game', zh:'游戏类同人绘画', en:'Game Doujin Illustration', num:'02',
+    subs:[
+      { key:'genshin',   zh:'原神',     en:'Genshin Impact' },
+      { key:'arknights', zh:'明日方舟',  en:'Arknights' },
+      { key:'other',     zh:'其他',     en:'Others' }
+    ]
+  },
+  {
+    key:'other', zh:'其他', en:'Others', num:'03',
+    subs:[
+      { key:'original', zh:'原创', en:'Original' },
+      { key:'other',    zh:'其他', en:'Others' }
+    ]
+  }
+];
+
+const WORKS = [
+  { id:'w001', cat:'game', sub:'arknights', title:'2021赫默生贺', titleEn:'2021 Silence Birthday', char:'赫默', charEn:'Silence', date:'2021-05-18', thumb:'images/w001-thumb.jpg', full:'images/w001-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'https://www.pixiv.net/artworks/90593450', weibo:'https://weibo.com/5581548764/4648002574878478' },
+  { id:'w002', cat:'game', sub:'arknights', title:'无题', titleEn:'Untitled', char:'深靛', charEn:'Indigo', date:'2021-06-03', thumb:'images/w002-thumb.jpg', full:'images/w002-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'https://www.pixiv.net/artworks/90593505', weibo:'https://weibo.com/5581548764/4643995479969208' },
+  { id:'w003', cat:'game', sub:'arknights', title:'无题', titleEn:'Untitled', char:'浊心斯卡蒂', charEn:'Skadi the Corrupting Heart', date:'2021-06-16', thumb:'images/w003-thumb.jpg', full:'images/w003-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'https://www.pixiv.net/artworks/90593344', weibo:'https://weibo.com/5581548764/4648002574878478' },
+  { id:'w004', cat:'game', sub:'arknights', title:'无题', titleEn:'Untitled', char:'琴柳', charEn:'Saileach', date:'2021-09-17', thumb:'images/w004-thumb.jpg', full:'images/w004-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'https://www.pixiv.net/artworks/92806347', weibo:'https://weibo.com/5581548764/4682810063848392' },
+  { id:'w005', cat:'game', sub:'other', title:'万圣节小恶魔', titleEn:'Halloween Little Devil', char:'米浴', charEn:'Rice Shower', date:'2021-10-04', thumb:'images/w005-thumb.jpg', full:'images/w005-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'https://www.pixiv.net/artworks/93217603', weibo:'https://weibo.com/5581548764/4688545481231072' },
+  { id:'w006', cat:'other', sub:'original', title:'无题', titleEn:'Untitled', char:'无名', charEn:'Unnamed', date:'2021-10-22', thumb:'images/w006-thumb.jpg', full:'images/w006-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'https://www.pixiv.net/artworks/94154749', weibo:'' },
+  { id:'w007', cat:'other', sub:'other', title:'小F的生日会', titleEn:"Little F's Birthday Party", char:'小F', charEn:'Fantasy', date:'2021-11-03', thumb:'images/w007-thumb.jpg', full:'images/w007-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'', weibo:'' },
+  { id:'w008', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'雷电将军', charEn:'Raiden Shogun', date:'2021-12-10', thumb:'images/w008-thumb.jpg', full:'images/w008-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'https://www.pixiv.net/artworks/94691843', weibo:'' },
+  { id:'w009', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'申鹤', charEn:'Shenhe', date:'2021-12-17', thumb:'images/w009-thumb.jpg', full:'images/w009-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'https://www.pixiv.net/artworks/94831729', weibo:'' },
+  { id:'w010', cat:'game', sub:'genshin', title:'贺喜迎春', titleEn:'Celebrating the Arrival of Spring', char:'甘雨', charEn:'Ganyu', date:'2022-01-12', thumb:'images/w010-thumb.jpg', full:'images/w010-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'https://www.pixiv.net/artworks/95482824', weibo:'' },
+  { id:'w011', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'八重神子', charEn:'Yae Miko', date:'2022-01-24', thumb:'images/w011-thumb.jpg', full:'images/w011-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'https://www.pixiv.net/artworks/95745005', weibo:'' },
+  { id:'w012', cat:'other', sub:'other', title:'童话', titleEn:'Fairy Tale', char:'艾莎 & 安娜', charEn:'Elsa & Anna', date:'2022-02-04', thumb:'images/w012-thumb.jpg', full:'images/w012-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'', weibo:'' },
+  { id:'w013', cat:'game', sub:'arknights', title:'浅滩律动', titleEn:'Shallow Rhythm', char:'蓝毒', charEn:'Blue Poison', date:'2021-05-23', thumb:'images/w013-thumb.jpg', full:'images/w013-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'https://www.pixiv.net/artworks/90593494', weibo:'' },
+  { id:'w014', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'八重神子', charEn:'Yae Miko', date:'2022-03-02', thumb:'images/w014-thumb.jpg', full:'images/w014-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'', weibo:'' },
+  { id:'w015', cat:'game', sub:'genshin', title:'清漪相约', titleEn:'An Underwater Date', char:'珊瑚宫心海', charEn:'Sangonomiya Kokomi', date:'2022-03-09', thumb:'images/w015-thumb.jpg', full:'images/w015-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'https://www.pixiv.net/artworks/96808317', weibo:'' },
+  { id:'w016', cat:'game', sub:'genshin', title:'夏日回忆', titleEn:'Summer Memories', char:'宵宫', charEn:'Yoimiya', date:'2022-03-26', thumb:'images/w016-thumb.jpg', full:'images/w016-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'https://www.pixiv.net/artworks/97206178', weibo:'' },
+  { id:'w017', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'夜兰', charEn:'Yelan', date:'2022-04-04', thumb:'images/w017-thumb.jpg', full:'images/w017-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'https://www.pixiv.net/artworks/97397656', weibo:'' },
+  { id:'w018', cat:'game', sub:'genshin', title:'白鹭朝汐', titleEn:'Egret·Morning Tide', char:'神里绫华', charEn:'Kamisato Ayaka', date:'2022-04-15', thumb:'images/w018-thumb.jpg', full:'images/w018-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'', weibo:'' },
+  { id:'w019', cat:'game', sub:'genshin', title:'春时', titleEn:'Springtime', char:'芭芭拉', charEn:'Barbara', date:'2022-04-22', thumb:'images/w019-thumb.jpg', full:'images/w019-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'https://www.pixiv.net/artworks/97800664', weibo:'https://weibo.com/5581548764/4761928754268413' },
+  { id:'w020', cat:'game', sub:'arknights', title:'2022赫默生贺', titleEn:'2022 Silence Birthday', char:'赫默', charEn:'Silence', date:'2022-05-18', thumb:'images/w020-thumb.jpg', full:'images/w020-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'https://www.pixiv.net/artworks/98550786', weibo:'https://weibo.com/5581548764/4770273796556019' },
+  { id:'w021', cat:'other', sub:'original', title:'无题', titleEn:'Untitled', char:'无名', charEn:'Unnamed', date:'2022-05-22', thumb:'images/w021-thumb.jpg', full:'images/w021-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'https://www.pixiv.net/artworks/98550611', weibo:'' },
+  { id:'w022', cat:'idol', sub:'lovelive', title:'追逐星晨', titleEn:'Star We Chase', char:'米娅·泰勒', charEn:'Mia Taylor', date:'2022-05-29', thumb:'images/w022-thumb.jpg', full:'images/w022-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'https://www.pixiv.net/artworks/98680281', weibo:'' },
+  { id:'w023', cat:'idol', sub:'lovelive', title:'決意の光', titleEn:'Light of Determination', char:'三船栞子', charEn:'Shioriko Mifune', date:'2022-06-11', thumb:'images/w023-thumb.jpg', full:'images/w023-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'https://www.pixiv.net/artworks/98986123', weibo:'https://weibo.com/5581548764/4779271324964022' },
+  { id:'w024', cat:'game', sub:'genshin', title:'2022雷电将军生贺', titleEn:'Raiden Shogun Birthday', char:'雷电将军', charEn:'Raiden Shogun', date:'2022-06-26', thumb:'images/w024-thumb.jpg', full:'images/w024-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'https://www.pixiv.net/artworks/99302119', weibo:'https://weibo.com/5581548764/4784400933589117' },
+  { id:'w025', cat:'game', sub:'genshin', title:'2022八重神子生贺', titleEn:'Yae Miko Birthday', char:'八重神子', charEn:'Yae Miko', date:'2022-06-25', thumb:'images/w025-thumb.jpg', full:'images/w025-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'', weibo:'' },
+  { id:'w026', cat:'game', sub:'genshin', title:'海风之梦', titleEn:'Summer Days', char:'琴·古恩希尔德', charEn:'Jean Gunnhildr', date:'2022-07-06', thumb:'images/w026-thumb.jpg', full:'images/w026-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'https://www.pixiv.net/artworks/99540479', weibo:'https://weibo.com/5581548764/4788239481176178' },
+  { id:'w027', cat:'other', sub:'other', title:'秋与神社', titleEn:'Shrine in autumn', char:'小F', charEn:'Fantasy', date:'2022-07-21', thumb:'images/w027-thumb.jpg', full:'images/w027-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'', weibo:'' },
+  { id:'w028', cat:'other', sub:'other', title:'莉可丽丝', titleEn:'Lycoris Recoil', char:'锦木千束 x 井之上泷奈', charEn:'Chisato & Takina', date:'2022-07-30', thumb:'images/w028-thumb.jpg', full:'images/w028-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'', weibo:'https://weibo.com/5581548764/4796852334231776' },
+  { id:'w029', cat:'game', sub:'genshin', title:'海水浴', titleEn:'swimming in the sea', char:'优菈', charEn:'Eula', date:'2022-07-31', thumb:'images/w029-thumb.jpg', full:'images/w029-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'https://www.pixiv.net/artworks/100130656', weibo:'https://weibo.com/5581548764/4797342517824694' },
+  { id:'w030', cat:'game', sub:'genshin', title:'陽光海岸', titleEn:'Sunshine Coast', char:'申鶴 & 夜蘭', charEn:'Shenhe & Yelan', date:'2022-08-08', thumb:'images/w030-thumb.jpg', full:'images/w030-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'https://www.pixiv.net/artworks/100322718', weibo:'' },
+  { id:'w031', cat:'game', sub:'arknights', title:'无题', titleEn:'Untitled', char:'史尔特尔', charEn:'Surtr', date:'2022-08-12', thumb:'images/w031-thumb.jpg', full:'images/w031-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'', weibo:'' },
+  { id:'w032', cat:'other', sub:'other', title:'莉可丽丝', titleEn:'Lycoris Recoil', char:'锦木千束 & 井之上泷奈', charEn:'Chisato & Takina', date:'2022-08-15', thumb:'images/w032-thumb.jpg', full:'images/w032-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'', weibo:'https://weibo.com/5581548764/4802745888935028' },
+  { id:'w033', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'妮露', charEn:'Nilou', date:'2022-08-23', thumb:'images/w033-thumb.jpg', full:'images/w033-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'https://www.pixiv.net/artworks/108484242', weibo:'' },
+  { id:'w034', cat:'other', sub:'original', title:'娜可的夏装', titleEn:"Nako's Summer Outfit", char:'娜可', charEn:'Nako', date:'2022-08-30', thumb:'images/w034-thumb.jpg', full:'images/w034-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'', weibo:'' },
+  { id:'w035', cat:'other', sub:'original', title:'娜可的泳装', titleEn:"Nako's Swimsuit", char:'娜可', charEn:'Nako', date:'2022-09-03', thumb:'images/w035-thumb.jpg', full:'images/w035-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'https://www.pixiv.net/artworks/104075287', weibo:'' },
+  { id:'w036', cat:'game', sub:'genshin', title:'月下', titleEn:'Beneath the Moon', char:'甘雨', charEn:'Ganyu', date:'2022-09-09', thumb:'images/w036-thumb.jpg', full:'images/w036-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'https://www.pixiv.net/artworks/123291586', weibo:'https://weibo.com/5581548764/4812203754786593' },
+  { id:'w037', cat:'idol', sub:'lovelive', title:'2022三船栞子生贺', titleEn:'Shioriko Birthday', char:'三船栞子', charEn:'Shioriko Mifune', date:'2022-10-05', thumb:'images/w037-thumb.jpg', full:'images/w037-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'', weibo:'' },
+  { id:'w038', cat:'idol', sub:'lovelive', title:'2022米娅泰勒生贺', titleEn:'Mia Birthday', char:'米娅·泰勒', charEn:'Mia Taylor', date:'2022-11-29', thumb:'images/w038-thumb.jpg', full:'images/w038-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'', weibo:'' },
+  { id:'w039', cat:'idol', sub:'bang', title:'无题', titleEn:'Untitled', char:'丸山彩', charEn:'Maruyama Aya', date:'2022-12-04', thumb:'images/w039-thumb.jpg', full:'images/w039-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'https://www.pixiv.net/artworks/104203546', weibo:'' },
+  { id:'w040', cat:'other', sub:'original', title:'娜可的冬装', titleEn:"Nako's Winter Outfit", char:'娜可', charEn:'Nako', date:'2022-12-21', thumb:'images/w040-thumb.jpg', full:'images/w040-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'', weibo:'' },
+  { id:'w041', cat:'game', sub:'genshin', title:'万象启新', titleEn:'Fresh Start', char:'申鶴 & 夜蘭', charEn:'Shenhe & Yelan', date:'2023-01-22', thumb:'images/w041-thumb.jpg', full:'images/w041-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'https://www.pixiv.net/artworks/104801551', weibo:'' },
+  { id:'w042', cat:'game', sub:'genshin', title:'水手服', titleEn:'JK-style Sailor Uniform', char:'珊瑚宫心海', charEn:'Sangonomiya Kokomi', date:'2023-02-17', thumb:'images/w042-thumb.jpg', full:'images/w042-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'https://www.pixiv.net/artworks/108460841', weibo:'' },
+  { id:'w043', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'迪希雅', charEn:'Dehya', date:'2023-02-28', thumb:'images/w043-thumb.jpg', full:'images/w043-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'', weibo:'' },
+  { id:'w044', cat:'game', sub:'arknights', title:'2023赫默生贺', titleEn:'2023 Silence Birthday', char:'赫默', charEn:'Silence', date:'2023-05-18', thumb:'images/w044-thumb.jpg', full:'images/w044-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'', weibo:'' },
+  { id:'w045', cat:'game', sub:'genshin', title:'疾雷', titleEn:'Swift Thunder', char:'刻晴', charEn:'Keqing', date:'2023-05-25', thumb:'images/w045-thumb.jpg', full:'images/w045-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'https://www.pixiv.net/artworks/119108773', weibo:'https://weibo.com/5581548764/4905393799568548' },
+  { id:'w046', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'优菈', charEn:'Eula', date:'2023-06-27', thumb:'images/w046-thumb.jpg', full:'images/w046-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'', weibo:'' },
+  { id:'w047', cat:'game', sub:'genshin', title:'兔女郎-甘雨', titleEn:'Icy Bunny Ganyu', char:'甘雨', charEn:'Ganyu', date:'2023-07-11', thumb:'images/w047-thumb.jpg', full:'images/w047-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'https://www.pixiv.net/artworks/113812998', weibo:'' },
+  { id:'w048', cat:'game', sub:'genshin', title:'兔女郎-优菈', titleEn:'Icy Bunny Eula', char:'优菈', charEn:'Eula', date:'2023-07-15', thumb:'images/w048-thumb.jpg', full:'images/w048-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'https://www.pixiv.net/artworks/114161433', weibo:'' },
+  { id:'w049', cat:'game', sub:'genshin', title:'兔女郎-绫华', titleEn:'Icy Bunny Ayaka', char:'神里绫华', charEn:'Kamisato Ayaka', date:'2023-07-19', thumb:'images/w049-thumb.jpg', full:'images/w049-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'https://www.pixiv.net/artworks/114433018', weibo:'' },
+  { id:'w050', cat:'game', sub:'genshin', title:'兔女郎-申鹤', titleEn:'Icy Bunny Shenhe', char:'申鹤', charEn:'Shenhe', date:'2023-07-23', thumb:'images/w050-thumb.jpg', full:'images/w050-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'https://www.pixiv.net/artworks/114501916', weibo:'' },
+  { id:'w051', cat:'game', sub:'arknights', title:'无题', titleEn:'Untitled', char:'缪尔赛思', charEn:'Muelsyse', date:'2023-08-03', thumb:'images/w051-thumb.jpg', full:'images/w051-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'', weibo:'https://weibo.com/5581548764/4997444868250715' },
+  { id:'w052', cat:'game', sub:'other', title:'明日奈水着', titleEn:"Asuna's swimsuit", char:'一之濑明日奈', charEn:'Ichinose Asuna', date:'2023-08-07', thumb:'images/w052-thumb.jpg', full:'images/w052-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'https://www.pixiv.net/artworks/110614384', weibo:'' },
+  { id:'w053', cat:'other', sub:'original', title:'无题', titleEn:'Untitled', char:'娜可', charEn:'Nako', date:'2023-08-22', thumb:'images/w053-thumb.jpg', full:'images/w053-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'', weibo:'' },
+  { id:'w054', cat:'game', sub:'genshin', title:'晴时雨', titleEn:'Serein', char:'荧', charEn:'Lumine', date:'2023-09-11', thumb:'images/w054-thumb.jpg', full:'images/w054-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'https://www.pixiv.net/artworks/111789501', weibo:'' },
+  { id:'w055', cat:'other', sub:'other', title:'无题', titleEn:'Untitled', char:'蜘蛛格温', charEn:'Gwendolyn Stacy', date:'2023-12-01', thumb:'images/w055-thumb.jpg', full:'images/w055-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'', weibo:'' },
+  { id:'w056', cat:'game', sub:'genshin', title:'致熠熠生辉的你', titleEn:'Gorgeous You', char:'娜维娅', charEn:'Navia Caspar', date:'2023-12-07', thumb:'images/w056-thumb.jpg', full:'images/w056-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'https://www.pixiv.net/artworks/114072148', weibo:'' },
+  { id:'w057', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'娜维娅', charEn:'Navia Caspar', date:'2023-12-30', thumb:'images/w057-thumb.jpg', full:'images/w057-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'', weibo:'' },
+  { id:'w058', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'雷电将军', charEn:'Raiden Shogun', date:'2024-01-10', thumb:'images/w058-thumb.jpg', full:'images/w058-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'https://www.pixiv.net/artworks/115053812', weibo:'' },
+  { id:'w059', cat:'game', sub:'other', title:'无题', titleEn:'Untitled', char:'OC by 归晏cozy', charEn:'OC by Guiyan', date:'2024-01-14', thumb:'images/w059-thumb.jpg', full:'images/w059-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'', weibo:'' },
+  { id:'w060', cat:'game', sub:'genshin', title:'闲鹤烟霞水石间', titleEn:'Crane, Mist, and Rugged mountains', char:'闲云', charEn:'Xianyun', date:'2024-02-02', thumb:'images/w060-thumb.jpg', full:'images/w060-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'https://www.pixiv.net/artworks/115694630', weibo:'https://weibo.com/5581548764/4997398650163110' },
+  { id:'w061', cat:'game', sub:'genshin', title:'残雪疏影暗香来', titleEn:'Snow, Shadow, and Subtle Fragrance', char:'申鹤', charEn:'Shenhe', date:'2024-02-21', thumb:'images/w061-thumb.jpg', full:'images/w061-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'https://www.pixiv.net/artworks/116263567', weibo:'https://weibo.com/5581548764/5003915022566690' },
+  { id:'w062', cat:'game', sub:'genshin', title:'彩练瑶芳浮梦寻', titleEn:'Colorful Ribbons, Jade, and Fleeting Dreams', char:'甘雨', charEn:'Ganyu', date:'2024-03-27', thumb:'images/w062-thumb.jpg', full:'images/w062-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'https://www.pixiv.net/artworks/118625280', weibo:'' },
+  { id:'w063', cat:'game', sub:'genshin', title:'无题', titleEn:'Untitled', char:'莫娜', charEn:'Mona Megistus', date:'2024-05-27', thumb:'images/w063-thumb.jpg', full:'images/w063-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'https://www.pixiv.net/artworks/119191226', weibo:'' },
+  { id:'w064', cat:'idol', sub:'imas', title:'初见', titleEn:'Encounter', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2024-06-22', thumb:'images/w064-thumb.jpg', full:'images/w064-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'https://www.pixiv.net/artworks/119858470', weibo:'https://weibo.com/5581548764/5047763240747403' },
+  { id:'w065', cat:'idol', sub:'imas', title:'半蓝之夏 01', titleEn:'Semi Blue 01', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2024-07-12', thumb:'images/w065-thumb.jpg', full:'images/w065-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'https://www.pixiv.net/artworks/120436045', weibo:'https://weibo.com/5581548764/5055281205609905' },
+  { id:'w066', cat:'idol', sub:'bang', title:'Rosenchor线稿无料', titleEn:'Freebies for Rosenchor', char:'凑友希那', charEn:'Yukina Minato', date:'2024-07-23', thumb:'images/w066-thumb.jpg', full:'images/w066-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'', weibo:'https://weibo.com/5581548764/5059355192071637' },
+  { id:'w067', cat:'idol', sub:'bang', title:'Rosenchor线稿无料', titleEn:'Freebies for Rosenchor', char:'今井莉莎', charEn:'Lisa Imai', date:'2024-07-23', thumb:'images/w067-thumb.jpg', full:'images/w067-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'', weibo:'https://weibo.com/5581548764/5059355192071637' },
+  { id:'w068', cat:'idol', sub:'bang', title:'Rosenchor线稿无料', titleEn:'Freebies for Rosenchor', char:'冰川纱夜', charEn:'Sayo Hikawa', date:'2024-07-23', thumb:'images/w068-thumb.jpg', full:'images/w068-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'', weibo:'https://weibo.com/5581548764/5059355192071637' },
+  { id:'w069', cat:'idol', sub:'bang', title:'Rosenchor线稿无料', titleEn:'Freebies for Rosenchor', char:'宇田川亚子', charEn:'Ako Udagawa', date:'2024-07-23', thumb:'images/w069-thumb.jpg', full:'images/w069-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'', weibo:'https://weibo.com/5581548764/5059355192071637' },
+  { id:'w070', cat:'idol', sub:'bang', title:'Rosenchor线稿无料', titleEn:'Freebies for Rosenchor', char:'白金燐子', charEn:'Rinko Shirokane', date:'2024-07-23', thumb:'images/w070-thumb.jpg', full:'images/w070-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'', weibo:'https://weibo.com/5581548764/5059355192071637' },
+  { id:'w071', cat:'idol', sub:'imas', title:'半蓝之夏 02', titleEn:'Semi Blue 02', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2024-08-12', thumb:'images/w071-thumb.jpg', full:'images/w071-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'https://www.pixiv.net/artworks/121446636', weibo:'' },
+  { id:'w072', cat:'idol', sub:'imas', title:'冠菊', titleEn:'Summer Festival', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2024-08-28', thumb:'images/w072-thumb.jpg', full:'images/w072-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'https://www.pixiv.net/artworks/121966158', weibo:'https://weibo.com/5581548764/5072447034361834' },
+  { id:'w073', cat:'idol', sub:'imas', title:'仮装狂騒曲', titleEn:'Halloween', char:'月村手毬', charEn:'Temari Tsukimura', date:'2024-10-12', thumb:'images/w073-thumb.jpg', full:'images/w073-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'https://www.pixiv.net/artworks/123262320', weibo:'https://weibo.com/5581548764/5088635412285350' },
+  { id:'w074', cat:'game', sub:'other', title:'无题', titleEn:'Untitled', char:'尾张（鳂）', charEn:'IJN Owari', date:'2024-11-22', thumb:'images/w074-thumb.jpg', full:'images/w074-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'https://www.pixiv.net/artworks/124527591', weibo:'' },
+  { id:'w075', cat:'idol', sub:'imas', title:'765火锅2花篮稿', titleEn:'HOTCHPOTCH FESTIV@L!! 2', char:'四条贵音&樱守歌织&百濑莉绪', charEn:'Takane & Kaori & Rio', date:'2025-01-07', thumb:'images/w075-thumb.jpg', full:'images/w075-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'', weibo:'' },
+  { id:'w076', cat:'idol', sub:'imas', title:'2025的新年参拜', titleEn:"New Year's Shrine Visit", char:'姬崎莉波&有村麻央', charEn:'Rinami & Mao', date:'2025-01-18', thumb:'images/w076-thumb.jpg', full:'images/w076-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'https://www.pixiv.net/artworks/126338155', weibo:'https://weibo.com/5581548764/5124230784221394' },
+  { id:'w077', cat:'game', sub:'other', title:'无题', titleEn:'Untitled', char:'奇尔沙治', charEn:'USS Kearsarge', date:'2025-01-28', thumb:'images/w077-thumb.jpg', full:'images/w077-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'https://www.pixiv.net/artworks/126628836', weibo:'' },
+  { id:'w078', cat:'game', sub:'other', title:'无题', titleEn:'Untitled', char:'新泽西', charEn:'USS New Jersey', date:'2025-02-04', thumb:'images/w078-thumb.jpg', full:'images/w078-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'https://www.pixiv.net/artworks/126886043', weibo:'' },
+  { id:'w079', cat:'idol', sub:'imas', title:'2025姬崎莉波生贺-甜心', titleEn:'2025 Rinami Birthday - Sweetheart', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-03-04', thumb:'images/w079-thumb.jpg', full:'images/w079-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'https://www.pixiv.net/artworks/127872660', weibo:'https://weibo.com/5581548764/5140613603263114' },
+  { id:'w080', cat:'idol', sub:'bang', title:'无题', titleEn:'Untitled', char:'八幡海铃', charEn:'Umiri Yahata', date:'2025-03-19', thumb:'images/w080-thumb.jpg', full:'images/w080-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'', weibo:'' },
+  { id:'w081', cat:'idol', sub:'imas', title:'春日来信', titleEn:'A Letter from Spring', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-04-12', thumb:'images/w081-thumb.jpg', full:'images/w081-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'https://www.pixiv.net/artworks/129225897', weibo:'https://weibo.com/5581548764/5154644875809397' },
+  { id:'w082', cat:'idol', sub:'imas', title:'幸福千层酥', titleEn:'Happy Mille-Feuille', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-06-07', thumb:'images/w082-thumb.jpg', full:'images/w082-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'https://www.pixiv.net/artworks/131286258', weibo:'' },
+  { id:'w083', cat:'idol', sub:'imas', title:'NEI花篮稿-立绘', titleEn:'NEVER END IDOL!!!!!!!!!!!!!', char:'菊地真', charEn:'Makoto Kikuchi', date:'2025-06-17', thumb:'images/w083-thumb.jpg', full:'images/w083-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'', weibo:'https://weibo.com/5581548764/5197316111731738' },
+  { id:'w084', cat:'idol', sub:'imas', title:'NEI花篮稿-合影', titleEn:'NEVER END IDOL!!!!!!!!!!!!!', char:'星井美希&我那霸响&四条贵音', charEn:'Miki & Hibiki & Takane', date:'2025-06-17', thumb:'images/w084-thumb.jpg', full:'images/w084-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'', weibo:'https://weibo.com/5581548764/5197316111731738' },
+  { id:'w085', cat:'idol', sub:'imas', title:'无题', titleEn:'Untitled', char:'郁田阳希', charEn:'Ikuta Haruki', date:'2025-06-21', thumb:'images/w085-thumb.jpg', full:'images/w085-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'', weibo:'' },
+  { id:'w086', cat:'idol', sub:'imas', title:'紫阳花的雨季', titleEn:'The Rainy Season of Hydrangeas', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-06-27', thumb:'images/w086-thumb.jpg', full:'images/w086-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'https://www.pixiv.net/artworks/132037610', weibo:'https://weibo.com/5581548764/5182216968864736' },
+  { id:'w087', cat:'idol', sub:'imas', title:'赛车女郎', titleEn:'Racing Queen Ver.', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-07-02', thumb:'images/w087-thumb.jpg', full:'images/w087-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'https://www.pixiv.net/artworks/132230780', weibo:'https://weibo.com/5581548764/5184010516171668' },
+  { id:'w088', cat:'idol', sub:'imas', title:'海之家联动', titleEn:'Beach House Collaboration', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-07-11', thumb:'images/w088-thumb.jpg', full:'images/w088-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'https://www.pixiv.net/artworks/132610944', weibo:'' },
+  { id:'w089', cat:'idol', sub:'imas', title:'仲夏夜花火', titleEn:"Midsummer Night's Fireworks", char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-07-23', thumb:'images/w089-thumb.jpg', full:'images/w089-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'https://www.pixiv.net/artworks/133026843', weibo:'https://weibo.com/5581548764/5191640952082098' },
+  { id:'w090', cat:'idol', sub:'bang', title:"Poppin'Party上海场花篮稿", titleEn:'Shiny High-Five!! Shanghai', char:"Poppin'Party", charEn:"Poppin'Party", date:'2025-07-30', thumb:'images/w090-thumb.jpg', full:'images/w090-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'', weibo:'https://weibo.com/5581548764/5203135804213165' },
+  { id:'w091', cat:'idol', sub:'imas', title:'怪猎合同-CoMETIK 01', titleEn:'Monster Hunter - CoMETIK 01', char:'CoMETIK', charEn:'CoMETIK', date:'2025-08-24', thumb:'images/w091-thumb.jpg', full:'images/w091-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'', weibo:'https://weibo.com/5581548764/5248511618581270' },
+  { id:'w092', cat:'idol', sub:'imas', title:'怪猎合同-CoMETIK 02', titleEn:'Monster Hunter - CoMETIK 02', char:'CoMETIK', charEn:'CoMETIK', date:'2025-08-24', thumb:'images/w092-thumb.jpg', full:'images/w092-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'', weibo:'https://weibo.com/5581548764/5248511618581270' },
+  { id:'w093', cat:'idol', sub:'imas', title:'Clumsy Trick', titleEn:'Clumsy Trick', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-08-26', thumb:'images/w093-thumb.jpg', full:'images/w093-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'', weibo:'https://weibo.com/5581548764/5215549316924275' },
+  { id:'w094', cat:'idol', sub:'imas', title:'水边的少女', titleEn:"La Jeune Fille au Bord de l'Eau", char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-09-12', thumb:'images/w094-thumb.jpg', full:'images/w094-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'https://www.pixiv.net/artworks/135058060', weibo:'https://weibo.com/5581548764/5210464284052764' },
+  { id:'w095', cat:'idol', sub:'imas', title:'MOIW2025花篮稿-姐姐组', titleEn:'THE IDOLM@STER M@STERS OF IDOL WORLD 2025', char:'三浦梓&樱守歌织&桑山千雪&姬崎莉波', charEn:'Azusa & Kaori & Chiyuki & Rinami', date:'2025-09-23', thumb:'images/w095-thumb.jpg', full:'images/w095-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'', weibo:'https://weibo.com/5581548764/5248882385883481' },
+  { id:'w096', cat:'idol', sub:'imas', title:'MOIW2025花篮稿-辣妹组', titleEn:'THE IDOLM@STER M@STERS OF IDOL WORLD 2025', char:'城崎美嘉&藤本里奈&所惠美&和泉爱依', charEn:'Mika & Rina & Megumi & Mei', date:'2025-10-17', thumb:'images/w096-thumb.jpg', full:'images/w096-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'', weibo:'https://weibo.com/5581548764/5248882385883481' },
+  { id:'w097', cat:'idol', sub:'imas', title:'红叶日和', titleEn:'A Perfect Day in Autumn', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-10-18', thumb:'images/w097-thumb.jpg', full:'images/w097-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'https://translate.google.com/?hl=zh-CN&sl=auto&tl=en&text=%E7%BA%A2%E5%8F%B6%E6%97%A5%E5%92%8C&op=translate', weibo:'https://weibo.com/5581548764/5222804498679928' },
+  { id:'w098', cat:'idol', sub:'imas', title:'魔女茶会 01', titleEn:'CoMETIK Coven 01', char:'斑鸠琉花', charEn:'Luca Ikaruga', date:'2025-10-25', thumb:'images/w098-thumb.jpg', full:'images/w098-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'https://www.pixiv.net/artworks/136913396', weibo:'https://weibo.com/5581548764/5227865719182202' },
+  { id:'w099', cat:'idol', sub:'imas', title:'炫光', titleEn:'Glare', char:'篠泽广', charEn:'Hiro Shinosawa', date:'2025-11-22', thumb:'images/w099-thumb.jpg', full:'images/w099-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'', weibo:'' },
+  { id:'w100', cat:'idol', sub:'imas', title:'秋日等待的车站', titleEn:'L.U.V', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-12-24', thumb:'images/w100-thumb.jpg', full:'images/w100-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'https://www.pixiv.net/artworks/139003748', weibo:'https://weibo.com/5581548764/5247496225822772' },
+  { id:'w101', cat:'idol', sub:'imas', title:'圣诞联动', titleEn:'Christmas Collaboration', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2025-12-26', thumb:'images/w101-thumb.jpg', full:'images/w101-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'https://www.pixiv.net/artworks/139109334', weibo:'https://weibo.com/5581548764/5248210321018032' },
+  { id:'w102', cat:'idol', sub:'imas', title:'見て', titleEn:'Look at me', char:'有村麻央', charEn:'Mao Arimura', date:'2026-01-18', thumb:'images/w102-thumb.jpg', full:'images/w102-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'https://www.pixiv.net/artworks/140059710', weibo:'https://weibo.com/5581548764/5256214809676834' },
+  { id:'w103', cat:'idol', sub:'imas', title:'鱼龙夜舞·千里丰年', titleEn:'2026 Spring Festival', char:'姬崎莉波&仓本千奈', charEn:'Rinami Himesaki & China Kuramoto', date:'2026-02-14', thumb:'images/w103-thumb.jpg', full:'images/w103-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'https://www.pixiv.net/artworks/141258229', weibo:'https://weibo.com/5581548764/5266917293298870' },
+  { id:'w104', cat:'idol', sub:'imas', title:'2026姬崎莉波生-轨迹贺', titleEn:'2025 Rinami Birthday - Trajectory', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2026-03-04', thumb:'images/w104-thumb.jpg', full:'images/w104-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'https://www.pixiv.net/artworks/141912642', weibo:'https://weibo.com/5581548764/5272882851873531' },
+  { id:'w105', cat:'idol', sub:'imas', title:'Wildest Flower', titleEn:'Wildest Flower', char:'花海咲季', charEn:'Saki Hanami', date:'2026-03-23', thumb:'images/w105-thumb.jpg', full:'images/w105-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'https://www.pixiv.net/artworks/143296315', weibo:'https://weibo.com/5581548764/5283043926608668' },
+  { id:'w106', cat:'idol', sub:'imas', title:'真っ白いページと水彩の主人公', titleEn:'A Blank White Page and a Watercolor Hero', char:'花海佑芽', charEn:'Ume Hanami', date:'2026-03-30', thumb:'images/w106-thumb.jpg', full:'images/w106-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'https://www.pixiv.net/artworks/143005084', weibo:'https://weibo.com/5581548764/5282681501523563' },
+  { id:'w107', cat:'idol', sub:'imas', title:'通勤制服', titleEn:'Business Suit', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2026-04-13', thumb:'images/w107-thumb.jpg', full:'images/w107-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'https://www.pixiv.net/artworks/143701857', weibo:'https://weibo.com/5581548764/5287217299983631' },
+  { id:'w108', cat:'idol', sub:'imas', title:'自己肯定感爆上げちゅ～↑↑', titleEn:'ShukiShuki', char:'藤田言音', charEn:'Kotone Fujita', date:'2026-04-26', thumb:'images/w108-thumb.jpg', full:'images/w108-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'https://www.pixiv.net/artworks/144128419', weibo:'https://weibo.com/5581548764/5292813134861556' },
+  { id:'w109', cat:'idol', sub:'imas', title:'眼镜合同-怀旧', titleEn:'Nostalgic Style', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2026-05-15', thumb:'images/w109-thumb.jpg', full:'images/w109-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'https://www.pixiv.net/artworks/149809746', weibo:'https://weibo.com/5581548764/5335934098740689' },
+  { id:'w110', cat:'idol', sub:'imas', title:'星之城', titleEn:'City of Stars', char:'姬崎莉波&有村麻央', charEn:'Rinami & Mao', date:'2026-06-03', thumb:'images/w110-thumb.jpg', full:'images/w110-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'', weibo:'https://weibo.com/5581548764/5306515717098347' },
+  { id:'w111', cat:'idol', sub:'imas', title:'赤裸々', titleEn:'SEKIRARA', char:'十王星南', charEn:'Sena Juo', date:'2026-06-15', thumb:'images/w111-thumb.jpg', full:'images/w111-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'https://www.pixiv.net/artworks/146043253', weibo:'https://weibo.com/5581548764/5310121028094074' },
+  { id:'w112', cat:'idol', sub:'imas', title:'明月夜', titleEn:'Moonlit Night', char:'秦谷美铃', charEn:'Misuzu Hataya', date:'2026-06-18', thumb:'images/w112-thumb.jpg', full:'images/w112-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'https://www.pixiv.net/artworks/149471334', weibo:'https://weibo.com/5581548764/5341336867964639' },
+  { id:'w113', cat:'idol', sub:'imas', title:'夏日时光', titleEn:'Summer Time', char:'紫云清夏&葛城莉莉娅', charEn:'Sumika Shiun & Lilja Katsuragi', date:'2026-06-22', thumb:'images/w113-thumb.jpg', full:'images/w113-full.jpg', c1:'#e6e2e0', c2:'#ccc6c2', pixiv:'https://www.pixiv.net/artworks/146336175', weibo:'https://weibo.com/5581548764/5312680072052767' },
+  { id:'w114', cat:'idol', sub:'imas', title:'My Stage', titleEn:'My Stage', char:'雨夜燕', charEn:'Tsubame Amaya', date:'2026-06-25', thumb:'images/w114-thumb.jpg', full:'images/w114-full.jpg', c1:'#e9e6df', c2:'#d2cec4', pixiv:'', weibo:'' },
+  { id:'w115', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'紫云清夏', charEn:'Sumika Shiun', date:'2026-07-12', thumb:'images/w115-thumb.jpg', full:'images/w115-full.jpg', c1:'#dfe4e2', c2:'#c2cac7', pixiv:'', weibo:'' },
+  { id:'w116', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'有村麻央', charEn:'Mao Arimura', date:'2026-07-12', thumb:'images/w116-thumb.jpg', full:'images/w116-full.jpg', c1:'#eae7de', c2:'#d4cfc0', pixiv:'', weibo:'' },
+  { id:'w117', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'篠泽广', charEn:'Hiro Shinosawa', date:'2026-07-12', thumb:'images/w117-thumb.jpg', full:'images/w117-full.jpg', c1:'#e1e3e8', c2:'#c4c8d0', pixiv:'', weibo:'' },
+  { id:'w118', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'葛城莉莉娅', charEn:'Lilja Katsuragi', date:'2026-07-12', thumb:'images/w118-thumb.jpg', full:'images/w118-full.jpg', c1:'#e4e8ea', c2:'#c6ccd0', pixiv:'', weibo:'' },
+  { id:'w119', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'姬崎莉波', charEn:'Rinami Himesaki', date:'2026-07-12', thumb:'images/w119-thumb.jpg', full:'images/w119-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'', weibo:'' },
+  { id:'w120', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'仓本千奈', charEn:'China Kuramoto', date:'2026-07-12', thumb:'images/w120-thumb.jpg', full:'images/w120-full.jpg', c1:'#eae4e0', c2:'#d2c8c2', pixiv:'', weibo:'' },
+  { id:'w121', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'月村手毬', charEn:'Temari Tsukimura', date:'2026-07-12', thumb:'images/w121-thumb.jpg', full:'images/w121-full.jpg', c1:'#e6e6e6', c2:'#c8c8c8', pixiv:'', weibo:'' },
+  { id:'w122', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'藤田言音', charEn:'Kotone Fujita', date:'2026-07-12', thumb:'images/w122-thumb.jpg', full:'images/w122-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'', weibo:'' },
+  { id:'w123', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'花海咲季', charEn:'Saki Hanami', date:'2026-07-12', thumb:'images/w123-thumb.jpg', full:'images/w123-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'', weibo:'' }
+];
+/* ============================================================
+   2. 状态
+   ============================================================ */
+const state = {
+  view:'home', cat:null, sub:'all',
+  sort:'date', sortDir:'desc', search:'', workId:null
+};
+const navStack = [];
+
+function pushNav(){
+  navStack.push({
+    view:state.view, cat:state.cat, sub:state.sub,
+    sort:state.sort, sortDir:state.sortDir,
+    search:state.search, workId:state.workId,
+    scrollY: window.scrollY
+  });
+  if (navStack.length > 60) navStack.shift();
+}
+
+/* ============================================================
+   3. 页面渐变过渡
+   ============================================================ */
+const overlay = document.getElementById('fadeOverlay');
+let transitioning = false;
+
+function transitionTo(fn, duration=400){
+  if (transitioning) return;
+  transitioning = true;
+  overlay.classList.add('on');
+  setTimeout(()=>{
+    try {
+      fn();
+    } catch(err){
+      console.error('页面切换出错：', err);
+    }
+    void document.body.offsetHeight;
+    overlay.classList.remove('on');
+    setTimeout(()=>{ transitioning = false; }, duration);
+  }, duration);
+}
+
+/* ============================================================
+   4. 渲染调度
+   ============================================================ */
+function render(restoreY){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+
+  if (state.view === 'home'){
+    document.getElementById('view-home').classList.add('active');
+  } else if (state.view === 'index'){
+    document.getElementById('view-index').classList.add('active');
+    renderIndex();
+  } else if (state.view === 'detail'){
+    document.getElementById('view-detail').classList.add('active');
+    renderDetail();
+  }
+
+  updateNav();
+
+  if (typeof restoreY === 'number' && restoreY > 0){
+    /* 临时关闭平滑滚动，瞬时跳到目标位置 */
+    const html = document.documentElement;
+    const prevBehavior = html.style.scrollBehavior;
+    html.style.scrollBehavior = 'auto';
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        window.scrollTo(0, restoreY);
+        /* 下一帧再恢复，避免浏览器补间 */
+        requestAnimationFrame(()=>{
+          html.style.scrollBehavior = prevBehavior || '';
+        });
+      });
+    });
+  } else {
+    const html = document.documentElement;
+    const prevBehavior = html.style.scrollBehavior;
+    html.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+    requestAnimationFrame(()=>{
+      html.style.scrollBehavior = prevBehavior || '';
+    });
+  }
+}
+
+function updateNav(){
+  const nav = document.getElementById('sidenav');
+  if (state.view === 'home') nav.classList.remove('show');
+  else nav.classList.add('show');
+}
+
+/* ============================================================
+   5. 首页分类
+   ============================================================ */
+function renderCats(){
+  const box = document.getElementById('cats');
+  box.innerHTML = '';
+
+  /* 全部作品 */
+  const allBtn = document.createElement('button');
+  allBtn.className = 'cat-card';
+  allBtn.innerHTML = `
+    <span class="cat-num">00</span>
+    <span class="cat-label">
+      <span class="zh">全部作品</span>
+      <span class="en">All Works</span>
+    </span>
+  `;
+  allBtn.addEventListener('click', () => openCat('all'));
+  box.appendChild(allBtn);
+
+  /* 三个大类 */
+  CATS.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-card';
+    btn.innerHTML = `
+      <span class="cat-num">${c.num}</span>
+      <span class="cat-label">
+        <span class="zh">${c.zh}</span>
+        <span class="en">${c.en}</span>
+      </span>
+    `;
+    btn.addEventListener('click', () => openCat(c.key));
+    box.appendChild(btn);
+  });
+}
+/* ============================================================
+   6. 导航行为
+   ============================================================ */
+function goHome(){
+  transitionTo(()=>{
+    navStack.length = 0;
+    state.view = 'home';
+    state.cat = null;
+    state.workId = null;
+    render();
+  });
+}
+
+function openCat(key){
+  transitionTo(()=>{
+    pushNav();
+    state.view = 'index';
+    state.cat = key;
+    state.sub = 'all';
+    state.sort = 'date';
+    state.sortDir = 'desc';
+    state.search = '';
+    state.workId = null;
+    const input = document.getElementById('searchInput');
+    if (input) input.value = '';
+    render();
+  });
+}
+
+function openDetail(id){
+  transitionTo(()=>{
+    pushNav();
+    state.view = 'detail';
+    state.workId = id;
+    render();
+  });
+}
+
+function goBack(){
+  transitionTo(()=>{
+    const prev = navStack.pop();
+    if (prev){
+      const scrollY = prev.scrollY || 0;
+      Object.assign(state, prev);
+      const input = document.getElementById('searchInput');
+      if (input) input.value = state.search || '';
+      render(scrollY);
+    } else {
+      state.view = 'home';
+      state.cat = null;
+      state.workId = null;
+      render();
+    }
+  });
+}
+
+/* ============================================================
+   7. Index 渲染
+   ============================================================ */
+let renderedSubCat = null;
+let subSliderInit = false;
+let sortSliderInit = false;
+
+function renderIndex(){
+  const isAll = (state.cat === 'all');
+  const cat = isAll ? null : CATS.find(c => c.key === state.cat);
+  if (!isAll && !cat) return;
+
+  document.getElementById('indexTitleZh').textContent = isAll ? '全部作品' : cat.zh;
+  document.getElementById('indexTitleEn').textContent = isAll ? 'All Works' : cat.en;
+
+  const tabs = document.getElementById('subTabs');
+
+  if (isAll){
+    /* 全部作品：隐藏子分类栏 */
+    tabs.style.display = 'none';
+    tabs.querySelectorAll('.subtab').forEach(el => el.remove());
+    renderedSubCat = null;
+    subSliderInit = false;
+  } else {
+    /* 具体分类：显示子分类栏 */
+    tabs.style.display = '';
+
+    if (renderedSubCat !== state.cat){
+      tabs.querySelectorAll('.subtab').forEach(el => el.remove());
+
+      const allBtn = document.createElement('button');
+      allBtn.className = 'subtab';
+      allBtn.dataset.sub = 'all';
+      allBtn.innerHTML = `<span class="zh">全部</span><span class="en">All</span>`;
+      allBtn.addEventListener('click', () => setSub('all'));
+      tabs.appendChild(allBtn);
+
+      (cat.subs || []).forEach(s => {
+        const b = document.createElement('button');
+        b.className = 'subtab';
+        b.dataset.sub = s.key;
+        b.innerHTML = `<span class="zh">${s.zh}</span><span class="en">${s.en}</span>`;
+        b.addEventListener('click', () => setSub(s.key));
+        tabs.appendChild(b);
+      });
+
+      renderedSubCat = state.cat;
+      subSliderInit = false;
+    }
+
+    tabs.querySelectorAll('.subtab').forEach(b => {
+      b.classList.toggle('active', b.dataset.sub === state.sub);
+    });
+  }
+
+  updateSortButtons();
+
+  requestAnimationFrame(()=>{
+    if (!isAll) updateSubSlider();
+    updateSortSlider();
+  });
+
+  renderGrid();
+}
+
+/* 排序按钮：同步 active 状态与小字
+   激活按钮按当前 sortDir 显示；非激活按钮显示各自的默认小字 */
+function updateSortButtons(){
+  document.querySelectorAll('#sortWrap button').forEach(b => {
+    const key = b.dataset.sort;
+    const isActive = (key === state.sort);
+    b.classList.toggle('active', isActive);
+
+    const enEl = b.querySelector('.en');
+    if (!enEl) return;
+
+    if (key === 'date'){
+      if (isActive){
+        enEl.textContent = state.sortDir === 'desc'
+          ? 'Newest to Oldest'
+          : 'Oldest to Newest';
+      } else {
+        enEl.textContent = 'Newest to Oldest';
+      }
+    } else {
+      if (isActive){
+        enEl.textContent = state.sortDir === 'asc'
+          ? 'A-Z'
+          : 'Z-A';
+      } else {
+        enEl.textContent = 'A-Z';
+      }
+    }
+  });
+}
+
+function setSub(key){
+  if (state.sub === key) return;
+  state.sub = key;
+  document.querySelectorAll('#subTabs .subtab').forEach(b => {
+    b.classList.toggle('active', b.dataset.sub === state.sub);
+  });
+  updateSubSlider();
+  renderGrid();
+}
+
+function updateSubSlider(){
+  const wrap = document.getElementById('subTabs');
+  const slider = document.getElementById('subSlider');
+  if (!wrap || !slider) return;
+  const active = wrap.querySelector('.subtab.active');
+  if (!active){ slider.style.opacity = '0'; return; }
+
+  const wr = wrap.getBoundingClientRect();
+  const ar = active.getBoundingClientRect();
+  const x = ar.left - wr.left - 1;
+  const w = ar.width;
+
+  if (!subSliderInit){
+    slider.style.transition = 'none';
+    slider.style.transform = `translate(${x}px,0)`;
+    slider.style.width = w + 'px';
+    slider.style.opacity = '1';
+    subSliderInit = true;
+    requestAnimationFrame(()=>{ slider.style.transition = ''; });
+  } else {
+    slider.style.transform = `translate(${x}px,0)`;
+    slider.style.width = w + 'px';
+    slider.style.opacity = '1';
+  }
+}
+
+function updateSortSlider(){
+  const wrap = document.getElementById('sortWrap');
+  const slider = document.getElementById('sortSlider');
+  if (!wrap || !slider) return;
+  const active = wrap.querySelector('button.active');
+  if (!active){ slider.style.opacity = '0'; return; }
+
+  const wr = wrap.getBoundingClientRect();
+  const ar = active.getBoundingClientRect();
+  const x = ar.left - wr.left;
+  const w = ar.width;
+
+  if (!sortSliderInit){
+    slider.style.transition = 'none';
+    slider.style.transform = `translate(${x}px,0)`;
+    slider.style.width = w + 'px';
+    slider.style.opacity = '1';
+    sortSliderInit = true;
+    requestAnimationFrame(()=>{ slider.style.transition = ''; });
+  } else {
+    slider.style.transform = `translate(${x}px,0)`;
+    slider.style.width = w + 'px';
+    slider.style.opacity = '1';
+  }
+}
+
+function renderGrid(){
+  let list;
+
+  if (state.cat === 'all'){
+    /* 全部作品：不过滤大类，也不过滤子分类 */
+    list = WORKS.slice();
+  } else {
+    list = WORKS.filter(w => w.cat === state.cat);
+
+    if (state.sub !== 'all'){
+      list = list.filter(w => w.sub === state.sub);
+    }
+  }
+
+  const q = (state.search || '').trim().toLowerCase();
+  if (q){
+    list = list.filter(w =>
+      (w.char + ' ' + (w.charEn || '')).toLowerCase().includes(q)
+    );
+  }
+
+  if (state.sort === 'date'){
+    list.sort((a, b) => state.sortDir === 'desc'
+      ? b.date.localeCompare(a.date)
+      : a.date.localeCompare(b.date)
+    );
+  } else {
+    list.sort((a, b) => {
+      const cmp = (a.charEn || a.char)
+        .localeCompare(b.charEn || b.char, 'en', { sensitivity:'base' });
+      return state.sortDir === 'asc' ? cmp : -cmp;
+    });
+  }
+
+  const grid = document.getElementById('workGrid');
+  grid.innerHTML = '';
+  if (!list.length){
+    grid.innerHTML = '<p class="empty">暂无作品 / No Works</p>';
+    return;
+  }
+  list.forEach(w => grid.appendChild(makeCard(w)));
+}
+
+/* 缩略图：有图用图，加载失败回退到渐变 + 首字 */
+function thumbInnerHTML(w){
+  if (w.thumb){
+    return `<img src="${w.thumb}" alt="${w.title}" loading="lazy" data-ph="${(w.char || '?').slice(0,1)}">`;
+  }
+  return `<span class="ph">${(w.char || '?').slice(0,1)}</span>`;
+}
+
+/* 给容器内的 img 绑定 error 回退 */
+function bindImgFallback(container){
+  container.querySelectorAll('img').forEach(img => {
+    img.addEventListener('error', () => {
+      const ph = img.dataset.ph || '?';
+      const span = document.createElement('span');
+      span.className = 'ph';
+      span.textContent = ph;
+      img.replaceWith(span);
+    });
+  });
+}
+
+function makeCard(w){
+  const card = document.createElement('article');
+  card.className = 'card';
+
+  card.innerHTML = `
+    <div class="thumb" style="background:linear-gradient(145deg,${w.c1},${w.c2})">
+      ${thumbInnerHTML(w)}
+    </div>
+    <div class="card-meta">
+      <h3 class="card-title">
+        <span class="zh">${w.title}</span>
+        <span class="en">${w.titleEn}</span>
+      </h3>
+      <p class="card-char">
+        <span class="zh">${w.char}</span>
+        <span class="en">${w.charEn}</span>
+      </p>
+      <p class="card-date">${w.date}</p>
+    </div>
+  `;
+
+  bindImgFallback(card);
+  card.addEventListener('click', () => openDetail(w.id));
+  return card;
+}
+
+/* ============================================================
+   8. 详情
+   ============================================================ */
+function renderDetail(){
+  const w = WORKS.find(x => x.id === state.workId);
+  if (!w) return;
+
+  document.getElementById('dTitleZh').textContent = w.title;
+  document.getElementById('dTitleEn').textContent = w.titleEn;
+  document.getElementById('dCharZh').textContent = w.char;
+  document.getElementById('dCharEn').textContent = w.charEn;
+  document.getElementById('dDateZh').textContent = w.date;
+  document.getElementById('dDateEn').textContent = w.date;
+
+  /* 原作地址：按需渲染 */
+  const links = [];
+  if (w.pixiv){
+    links.push(`
+      <a href="${w.pixiv}" target="_blank" rel="noopener">
+        <span class="zh">Pixiv</span>
+        <span class="en">原作地址 / Source</span>
+      </a>
+    `);
+  }
+  if (w.weibo){
+    links.push(`
+      <a href="${w.weibo}" target="_blank" rel="noopener">
+        <span class="zh">Weibo</span>
+        <span class="en">原作地址 / Source</span>
+      </a>
+    `);
+  }
+  document.getElementById('dLinks').innerHTML = links.length
+    ? links.join('')
+    : '<span class="no-source">暂无原作地址 / No Source</span>';
+
+  /* 大图 */
+  const box = document.getElementById('detailImg');
+  const bigSrc = w.full || w.thumb;
+  box.style.background = `linear-gradient(145deg,${w.c1},${w.c2})`;
+
+  const bigInner = bigSrc
+    ? `<img src="${bigSrc}" alt="${w.title}" data-ph="${(w.char || '?').slice(0,1)}">`
+    : `<span class="ph">${(w.char || '?').slice(0,1)}</span>`;
+
+  box.innerHTML = `
+    ${bigInner}
+    <span class="hint">点击图片全屏 · 点击空白处返回</span>
+  `;
+  bindImgFallback(box);
+
+  box.style.animation = 'none';
+  void box.offsetWidth;
+  box.style.animation = '';
+  box.onclick = (e) => {
+    e.stopPropagation();
+    openFull(w);
+  };
+
+  const panel = document.getElementById('detailPanel');
+  panel.classList.remove('expand');
+  void panel.offsetWidth;
+  panel.classList.add('expand');
+}
+
+/* ============================================================
+   9. 全屏
+   ============================================================ */
+function openFull(w){
+  const lb = document.getElementById('lightbox');
+  const src = w.full || w.thumb;
+
+  const inner = src
+    ? `<img src="${src}" alt="${w.title}" data-ph="${(w.char || '?').slice(0,1)}">`
+    : `<span class="ph">${(w.char || '?').slice(0,1)}</span>`;
+
+  const bg = src
+    ? 'background:#111'
+    : `background:linear-gradient(145deg,${w.c1},${w.c2})`;
+
+  lb.innerHTML = `<div class="lb-inner" style="${bg}">${inner}</div>`;
+  bindImgFallback(lb);
+  lb.classList.add('open');
+}
+
+document.getElementById('lightbox').addEventListener('click', function(){
+  this.classList.remove('open');
+  this.innerHTML = '';
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){
+    const lb = document.getElementById('lightbox');
+    if (lb.classList.contains('open')){
+      lb.classList.remove('open');
+      lb.innerHTML = '';
+    }
+  }
+});
+
+/* ============================================================
+   10. 事件绑定 & 启动
+   ============================================================ */
+document.querySelectorAll('[data-action]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const a = btn.dataset.action;
+    if (a === 'home') goHome();
+    if (a === 'back') goBack();
+  });
+});
+
+document.querySelectorAll('.cat-menu a').forEach(a => {
+  a.addEventListener('click', () => openCat(a.dataset.cat));
+});
+
+/* 排序按钮：点击已选中栏位则切换方向 */
+document.querySelectorAll('#sortWrap button').forEach(b => {
+  b.addEventListener('click', () => {
+    const key = b.dataset.sort;
+
+    if (state.sort === key){
+      state.sortDir = state.sortDir === 'desc' ? 'asc' : 'desc';
+    } else {
+      state.sort = key;
+      state.sortDir = (key === 'date') ? 'desc' : 'asc';
+    }
+
+    updateSortButtons();
+    updateSortSlider();
+    renderGrid();
+  });
+});
+
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', e => {
+  state.search = e.target.value;
+  renderGrid();
+});
+
+window.addEventListener('resize', () => {
+  if (state.view === 'index'){
+    subSliderInit = true;
+    sortSliderInit = true;
+    updateSubSlider();
+    updateSortSlider();
+  }
+});
+
+/* 详情页：点击图片旁边（非图片区域）返回 */
+document.getElementById('detailStage').addEventListener('click', () => {
+  goBack();
+});
+
+/* 启动 */
+renderCats();
+document.body.classList.add('intro');
+render();
+
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{ overlay.classList.remove('on'); }, 120);
+});
+</script>
+</body>
+</html>
