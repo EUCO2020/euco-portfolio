@@ -536,6 +536,145 @@ body.intro .home-cats{animation:fadeUp .8s ease 3.25s both}
   .subtab{flex:1;min-width:0;padding:13px 12px}
   .subtab .zh{font-size:11px}
 }
+
+/* ============================================================
+   移动端专用样式（<= 820px）
+   ============================================================ */
+.mobile-nav,
+.mobile-cat-drop,
+.m-subtabs{display:none}
+
+@media(max-width:820px){
+
+  /* ----- 隐藏桌面端左侧导航 ----- */
+  .sidenav{display:none !important}
+
+  /* ----- 移动端右上角三个按钮 ----- */
+  .mobile-nav{
+    display:flex;
+    position:fixed;
+    top:0;right:0;
+    z-index:600;
+    height:46px;
+    background:var(--surface);
+    border-left:1px solid var(--line-strong);
+    border-bottom:1px solid var(--line-strong);
+    align-items:stretch;
+  }
+  .mobile-nav button{
+    width:48px;
+    height:46px;
+    display:grid;
+    place-items:center;
+    border:none;
+    border-right:1px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    cursor:pointer;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-nav button:last-child{border-right:none}
+  .mobile-nav button:active{background:var(--hover)}
+  .mobile-nav svg{width:19px;height:19px;display:block}
+
+  /* ----- 移动端分类下拉 ----- */
+  .mobile-cat-drop{
+    display:block;
+    position:fixed;
+    top:46px;right:0;
+    z-index:599;
+    width:min(78vw,260px);
+    max-height:0;
+    overflow:hidden;
+    background:var(--surface);
+    border-left:1px solid var(--line-strong);
+    border-bottom:1px solid var(--line-strong);
+    transition:max-height .32s cubic-bezier(.4,0,.2,1);
+  }
+  .mobile-cat-drop.open{max-height:420px}
+  .mobile-cat-drop a{
+    display:block;
+    padding:15px 20px;
+    border-bottom:1px solid var(--line);
+    color:var(--ink);
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .mobile-cat-drop a:last-child{border-bottom:none}
+  .mobile-cat-drop a:active{background:var(--hover)}
+  .mobile-cat-drop a .zh{font-size:13px;font-weight:700;letter-spacing:.02em}
+  .mobile-cat-drop a .en{font-size:9px;letter-spacing:.14em;margin-top:5px;color:var(--ink-3)}
+
+  /* ----- 主内容区让出左侧导航 ----- */
+  #view-index{margin-left:0;padding:0 20px 72px}
+  #view-detail{margin-left:0}
+
+  /* ----- head-row 与右上角按钮对齐 ----- */
+  #view-index .head-row{
+    min-height:46px;
+    padding:0 150px 0 0;
+    align-items:center;
+  }
+
+  /* ----- 详情页面板顶部让出按钮 ----- */
+  .detail-panel-inner{padding:60px 24px 36px}
+
+  /* ----- 排序栏：两个排序按钮一行，搜索另起一行 ----- */
+  .toolbar{width:100%;margin-top:26px;flex-wrap:wrap}
+  .tool-label{display:none}
+  .sort-wrap{flex:1;min-width:0}
+  .sort-wrap button{flex:1;padding:12px 8px 13px;align-items:center}
+  .sort-wrap button .zh{font-size:0;text-align:center;width:100%;line-height:1.2}
+  .sort-wrap button .zh::before{font-size:13px;font-weight:600;letter-spacing:.06em}
+  .sort-wrap button[data-sort="date"] .zh::before{content:"时间"}
+  .sort-wrap button[data-sort="name"] .zh::before{content:"角色名"}
+  .sort-wrap button .en{display:none}
+  .search-wrap{width:100%;flex-basis:100%;min-width:0}
+
+  /* ----- 移动端子分类下拉 ----- */
+  .subtabs{display:none !important}
+  .m-subtabs{display:block;margin-top:26px;position:relative}
+  .m-subtabs.hidden{display:none}
+  .m-subtrigger{
+    display:flex;align-items:center;justify-content:space-between;
+    width:100%;padding:14px 18px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    font-family:inherit;color:var(--ink);
+    cursor:pointer;text-align:left;
+  }
+  .m-subtrigger-label{font-size:13px;font-weight:700;letter-spacing:.02em}
+  .m-subtrigger-arrow{
+    width:16px;height:16px;flex-shrink:0;
+    transition:transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  .m-subtrigger.open .m-subtrigger-arrow{transform:rotate(-90deg)}
+  .m-submenu{
+    max-height:0;overflow:hidden;background:var(--surface);
+    border-left:1px solid var(--line);border-right:1px solid var(--line);
+    transition:max-height .32s cubic-bezier(.4,0,.2,1);
+  }
+  .m-submenu.open{max-height:520px;border-bottom:1px solid var(--line)}
+  .m-subitem{
+    display:block;width:100%;padding:13px 18px;
+    border:none;border-bottom:1px solid var(--line);
+    background:var(--surface);font-family:inherit;color:var(--ink);
+    cursor:pointer;text-align:left;transition:background .2s;
+  }
+  .m-subitem:last-child{border-bottom:none}
+  .m-subitem:active{background:var(--hover)}
+  .m-subitem.active{background:var(--ink)}
+  .m-subitem.active .zh{color:var(--surface)}
+  .m-subitem.active .en{color:rgba(255,255,255,.6)}
+  .m-subitem .zh{font-size:13px;font-weight:600;letter-spacing:.02em}
+  .m-subitem .en{font-size:9px;letter-spacing:.14em;margin-top:4px;color:var(--ink-3)}
+
+  /* ----- 首页分类栏改成 2x2 ----- */
+  .home-cats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cat-card{aspect-ratio:auto;padding:26px 22px;gap:20px;min-height:140px}
+}
+
 </style>
 </head>
 <body>
@@ -650,6 +789,17 @@ body.intro .home-cats{animation:fadeUp .8s ease 3.25s both}
     <div class="subtab-slider" id="subSlider"></div>
   </div>
 
+  <!-- 移动端：子分类下拉 -->
+  <div class="m-subtabs hidden" id="mSubTabs">
+    <button class="m-subtrigger" id="mSubTrigger">
+      <span class="m-subtrigger-label" id="mSubLabel">全部</span>
+      <svg class="m-subtrigger-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <div class="m-submenu" id="mSubMenu"></div>
+  </div>
+
   <div class="toolbar">
     <span class="tool-label">排序 / Sort</span>
     <div class="sort-wrap" id="sortWrap">
@@ -715,6 +865,37 @@ body.intro .home-cats{animation:fadeUp .8s ease 3.25s both}
 </section>
 
 <div class="lightbox" id="lightbox"></div>
+
+<!-- 移动端：右上角三个按钮 -->
+<nav class="mobile-nav" id="mobileNav">
+  <button id="mHome" aria-label="主页">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 10.5L12 3l9 7.5"/>
+      <path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>
+    </svg>
+  </button>
+  <button id="mBack" aria-label="返回">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 14L4 9l5-5"/>
+      <path d="M4 9h10a6 6 0 0 1 6 6v1"/>
+    </svg>
+  </button>
+  <button id="mMenu" aria-label="分类">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <line x1="4" y1="7" x2="20" y2="7"/>
+      <line x1="4" y1="12" x2="20" y2="12"/>
+      <line x1="4" y1="17" x2="20" y2="17"/>
+    </svg>
+  </button>
+</nav>
+
+<!-- 移动端：分类下拉 -->
+<div class="mobile-cat-drop" id="mobileCatDrop">
+  <a data-cat="all"><span class="zh">全部作品</span><span class="en">All Works</span></a>
+  <a data-cat="idol"><span class="zh">偶像类同人绘画</span><span class="en">Idol Doujin Illustration</span></a>
+  <a data-cat="game"><span class="zh">游戏类同人绘画</span><span class="en">Game Doujin Illustration</span></a>
+  <a data-cat="other"><span class="zh">其他</span><span class="en">Others</span></a>
+</div>
 
 <script>
 /* ============================================================
@@ -1069,16 +1250,26 @@ function renderIndex(){
   document.getElementById('indexTitleZh').textContent = isAll ? '全部作品' : cat.zh;
   document.getElementById('indexTitleEn').textContent = isAll ? 'All Works' : cat.en;
 
+  /* 移动端子分类下拉 */
+  const mSubTabs = document.getElementById('mSubTabs');
+  if (mSubTabs){
+    if (isAll){
+      mSubTabs.classList.add('hidden');
+      closeMobileSub();
+    } else {
+      mSubTabs.classList.remove('hidden');
+      renderMobileSub(cat);
+    }
+  }
+
   const tabs = document.getElementById('subTabs');
 
   if (isAll){
-    /* 全部作品：隐藏子分类栏 */
     tabs.style.display = 'none';
     tabs.querySelectorAll('.subtab').forEach(el => el.remove());
     renderedSubCat = null;
     subSliderInit = false;
   } else {
-    /* 具体分类：显示子分类栏 */
     tabs.style.display = '';
 
     if (renderedSubCat !== state.cat){
@@ -1119,6 +1310,52 @@ function renderIndex(){
   renderGrid();
 }
 
+/* 移动端子分类：渲染下拉菜单 */
+function renderMobileSub(cat){
+  const menu = document.getElementById('mSubMenu');
+  const label = document.getElementById('mSubLabel');
+  if (!menu) return;
+
+  menu.innerHTML = '';
+
+  const allItem = document.createElement('button');
+  allItem.className = 'm-subitem' + (state.sub === 'all' ? ' active' : '');
+  allItem.dataset.sub = 'all';
+  allItem.innerHTML = `<span class="zh">全部</span><span class="en">All</span>`;
+  allItem.addEventListener('click', () => {
+    setSub('all');
+    closeMobileSub();
+  });
+  menu.appendChild(allItem);
+
+  (cat.subs || []).forEach(s => {
+    const item = document.createElement('button');
+    item.className = 'm-subitem' + (state.sub === s.key ? ' active' : '');
+    item.dataset.sub = s.key;
+    item.innerHTML = `<span class="zh">${s.zh}</span><span class="en">${s.en}</span>`;
+    item.addEventListener('click', () => {
+      setSub(s.key);
+      closeMobileSub();
+    });
+    menu.appendChild(item);
+  });
+
+  /* 更新按钮上的当前分类文字 */
+  let labelText = '全部';
+  if (state.sub !== 'all'){
+    const found = (cat.subs || []).find(s => s.key === state.sub);
+    if (found) labelText = found.zh;
+  }
+  if (label) label.textContent = labelText;
+}
+
+/* 收起移动端子分类下拉 */
+function closeMobileSub(){
+  const menu = document.getElementById('mSubMenu');
+  const trigger = document.getElementById('mSubTrigger');
+  if (menu) menu.classList.remove('open');
+  if (trigger) trigger.classList.remove('open');
+}
 /* 排序按钮：同步 active 状态与小字
    激活按钮按当前 sortDir 显示；非激活按钮显示各自的默认小字 */
 function updateSortButtons(){
@@ -1153,10 +1390,31 @@ function updateSortButtons(){
 function setSub(key){
   if (state.sub === key) return;
   state.sub = key;
+
+  /* 桌面端标签栏 */
   document.querySelectorAll('#subTabs .subtab').forEach(b => {
     b.classList.toggle('active', b.dataset.sub === state.sub);
   });
   updateSubSlider();
+
+  /* 移动端下拉 */
+  const menu = document.getElementById('mSubMenu');
+  if (menu){
+    menu.querySelectorAll('.m-subitem').forEach(b => {
+      b.classList.toggle('active', b.dataset.sub === state.sub);
+    });
+    const cat = CATS.find(c => c.key === state.cat);
+    if (cat){
+      const label = document.getElementById('mSubLabel');
+      let labelText = '全部';
+      if (state.sub !== 'all'){
+        const found = (cat.subs || []).find(s => s.key === state.sub);
+        if (found) labelText = found.zh;
+      }
+      if (label) label.textContent = labelText;
+    }
+  }
+
   renderGrid();
 }
 
@@ -1463,6 +1721,102 @@ render();
 window.addEventListener('load', ()=>{
   setTimeout(()=>{ overlay.classList.remove('on'); }, 120);
 });
+
+/* ============================================================
+   移动端事件绑定
+   ============================================================ */
+(function bindMobileEvents(){
+
+  /* 顶部三个按钮 */
+  const mHome = document.getElementById('mHome');
+  const mBack = document.getElementById('mBack');
+  const mMenu = document.getElementById('mMenu');
+  const mobileCatDrop = document.getElementById('mobileCatDrop');
+
+  if (mHome) mHome.addEventListener('click', () => {
+    if (mobileCatDrop) mobileCatDrop.classList.remove('open');
+    goHome();
+  });
+
+  if (mBack) mBack.addEventListener('click', () => {
+    if (mobileCatDrop) mobileCatDrop.classList.remove('open');
+    goBack();
+  });
+
+  if (mMenu && mobileCatDrop){
+    mMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mobileCatDrop.classList.toggle('open');
+    });
+  }
+
+  /* 移动端分类下拉的项 */
+  document.querySelectorAll('#mobileCatDrop a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileCatDrop.classList.remove('open');
+      openCat(a.dataset.cat);
+    });
+  });
+
+  /* 点击其他地方关闭分类下拉 */
+  document.addEventListener('click', (e) => {
+    if (!mobileCatDrop || !mobileCatDrop.classList.contains('open')) return;
+    if (mobileCatDrop.contains(e.target)) return;
+    if (e.target.closest('#mMenu')) return;
+    mobileCatDrop.classList.remove('open');
+  });
+
+  /* 移动端子分类展开/收起 */
+  const mSubTrigger = document.getElementById('mSubTrigger');
+  const mSubMenu = document.getElementById('mSubMenu');
+
+  if (mSubTrigger && mSubMenu){
+    mSubTrigger.addEventListener('click', () => {
+      const isOpen = mSubMenu.classList.contains('open');
+
+      if (isOpen){
+        mSubMenu.classList.remove('open');
+        mSubTrigger.classList.remove('open');
+        return;
+      }
+
+      mSubMenu.classList.add('open');
+      mSubTrigger.classList.add('open');
+
+      /* 展开后回正位置：太靠上或太靠下都自动滑动 */
+      setTimeout(() => {
+        const rect = mSubTrigger.getBoundingClientRect();
+        const menuH = mSubMenu.scrollHeight;
+        const vh = window.innerHeight;
+        const bottom = rect.bottom + menuH;
+
+        let delta = 0;
+        if (rect.top < 70){
+          delta = rect.top - 70;
+        } else if (bottom > vh - 20){
+          delta = bottom - (vh - 20);
+          if (rect.top - delta < 70) delta = rect.top - 70;
+        }
+
+        if (delta !== 0){
+          window.scrollBy({ top: delta, behavior: 'smooth' });
+        }
+      }, 60);
+    });
+  }
+})();
+
+/* 视图切换时收起移动端下拉 */
+const _origRender = render;
+render = function(restoreY){
+  _origRender(restoreY);
+  if (state.view !== 'index'){
+    const dd = document.getElementById('mobileCatDrop');
+    if (dd) dd.classList.remove('open');
+    closeMobileSub();
+  }
+};
+
 </script>
 </body>
 </html>
