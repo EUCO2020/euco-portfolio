@@ -1153,6 +1153,17 @@ const WORKS = [
   { id:'w122', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'藤田言音', charEn:'Kotone Fujita', date:'2026-07-12', thumb:'images/w122-thumb.jpg', full:'images/w122-full.jpg', c1:'#e8e6e0', c2:'#cfcdc5', pixiv:'', weibo:'' },
   { id:'w123', cat:'idol', sub:'imas', title:'初-IF', titleEn:'DEBUT-IF', char:'花海咲季', charEn:'Saki Hanami', date:'2026-07-12', thumb:'images/w123-thumb.jpg', full:'images/w123-full.jpg', c1:'#e2e4e6', c2:'#c6c9cc', pixiv:'', weibo:'' }
 ];
+
+/* ============================================================
+   隐藏列表：这些 id 的作品不显示图片，只用占位符
+   增删 id 即可控制，例如去掉 'w047' 就会恢复显示
+   ============================================================ */
+const HIDDEN_IDS = ['w047','w048','w049','w050','w052','w074','w077','w078'];
+
+function isHidden(id){
+  return HIDDEN_IDS.indexOf(id) !== -1;
+}
+
 /* ============================================================
    2. 状态
    ============================================================ */
@@ -1624,10 +1635,11 @@ function renderGrid(){
 
 /* 缩略图：有图用图，加载失败回退到渐变 + 首字 */
 function thumbInnerHTML(w){
-  if (w.thumb){
-    return `<img src="${w.thumb}" alt="${w.title}" loading="lazy" data-ph="${(w.char || '?').slice(0,1)}">`;
+  const ph = (w.char || '?').slice(0,1);
+  if (w.thumb && !isHidden(w.id)){
+    return `<img src="${w.thumb}" alt="${w.title}" loading="lazy" data-ph="${ph}">`;
   }
-  return `<span class="ph">${(w.char || '?').slice(0,1)}</span>`;
+  return `<span class="ph">${ph}</span>`;
 }
 
 /* 给容器内的 img 绑定 error 回退 */
@@ -1707,7 +1719,7 @@ function renderDetail(){
 
   /* 大图 */
   const box = document.getElementById('detailImg');
-  const bigSrc = w.full || w.thumb;
+  const bigSrc = isHidden(w.id) ? '' : (w.full || w.thumb);
   box.style.background = `linear-gradient(145deg,${w.c1},${w.c2})`;
 
   const bigInner = bigSrc
@@ -1739,7 +1751,7 @@ function renderDetail(){
    ============================================================ */
 function openFull(w){
   const lb = document.getElementById('lightbox');
-  const src = w.full || w.thumb;
+  const src = isHidden(w.id) ? '' : (w.full || w.thumb);
 
   const inner = src
     ? `<img src="${src}" alt="${w.title}" data-ph="${(w.char || '?').slice(0,1)}">`
