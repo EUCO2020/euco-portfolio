@@ -468,16 +468,29 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 }
 @media(max-width:820px){
   .detail-layout{flex-direction:column}
+
+  /* 图片在上 */
+  .detail-stage{
+    order:1;
+    padding:66px 20px 24px;
+  }
+  .detail-img{width:100%}
+
+  /* 信息在下 */
   .detail-panel,
   .detail-panel.expand{
-    animation:panelExpandSm .6s cubic-bezier(.65,0,.35,1) forwards;
-    border-right:none;border-bottom:1px solid var(--line-strong);
+    animation:none;
+    width:100%;
+    max-height:none;
+    border-right:none;
+    border-bottom:none;
+    border-top:1px solid var(--line-strong);
+    order:2;
   }
-  @keyframes panelExpandSm{from{width:100%;max-height:0}to{width:100%;max-height:1600px}}
-  .detail-panel-inner{width:100%;padding:28px 28px 36px}
-  .detail-stage{padding:28px}
-  .detail-img{width:100%}
-}
+  .detail-panel-inner{
+    width:100%;
+    padding:28px 20px 40px;
+  }}
 
 /* ============================================================
    全屏
@@ -642,7 +655,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   /* ----- 主内容区让出顶部标题栏 ----- */
   #view-index{margin-left:0;padding:66px 20px 72px}
   #view-detail{margin-left:0}
-  .detail-panel-inner{padding:66px 24px 36px}
+
 
   /* ----- 排序栏：两个按钮一行等宽，搜索下一行等宽 ----- */
   .toolbar{
