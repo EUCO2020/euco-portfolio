@@ -432,7 +432,6 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   overflow:hidden;
   cursor:zoom-in;position:relative;background:var(--surface);
   transition:border-color .3s ease;
-  animation:imgIn .85s cubic-bezier(.2,.8,.2,1) both;
 }
 .detail-img:hover{border-color:var(--ink)}
 @keyframes imgIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
@@ -444,6 +443,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   max-height:calc(100vh - 220px);
   width:auto;height:auto;
   object-fit:contain;
+  animation:imgIn .85s cubic-bezier(.2,.8,.2,1) both;
 }
 
 /* 无图时的占位符才用正方形 */
@@ -453,6 +453,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   display:grid;place-items:center;
   font-size:clamp(60px,11vw,130px);font-weight:800;
   color:rgba(17,17,17,.82);line-height:1;
+  animation:imgIn .85s cubic-bezier(.2,.8,.2,1) both;
 }
 .detail-img .hint{
   position:static;
