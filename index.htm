@@ -200,6 +200,10 @@ body.intro #artistId{animation:idSeq 2.8s cubic-bezier(.22,.9,.24,1) .15s both}
 body.intro .hero-tag{animation:fadeUp .8s ease 2.7s both}
 body.intro .home-socials{animation:fadeUp .8s ease 2.95s both}
 body.intro .home-cats{animation:fadeUp .8s ease 3.25s both}
+/* 从 index/detail 返回主页：跳过 ID 动画，只让栏目淡入 */
+body.intro-soft .hero-tag{animation:fadeUp .7s ease .1s both}
+body.intro-soft .home-socials{animation:fadeUp .7s ease .25s both}
+body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
 /* ============================================================
@@ -1308,7 +1312,18 @@ function goHome(){
     state.view = 'home';
     state.cat = null;
     state.workId = null;
+
+    /* 移除首次加载动画类，避免 ID 缩小动画重新播放 */
+    document.body.classList.remove('intro');
+    document.body.classList.remove('intro-soft');
+    void document.body.offsetHeight;
+
     render();
+
+    /* 下一帧触发栏目淡入 */
+    requestAnimationFrame(()=>{
+      document.body.classList.add('intro-soft');
+    });
   });
 }
 
@@ -1345,12 +1360,30 @@ function goBack(){
       Object.assign(state, prev);
       const input = document.getElementById('searchInput');
       if (input) input.value = state.search || '';
-      render(scrollY);
+
+      if (state.view === 'home'){
+        /* 回到主页：跳过 ID 动画 */
+        document.body.classList.remove('intro');
+        document.body.classList.remove('intro-soft');
+        void document.body.offsetHeight;
+        render(scrollY);
+        requestAnimationFrame(()=>{
+          document.body.classList.add('intro-soft');
+        });
+      } else {
+        render(scrollY);
+      }
     } else {
       state.view = 'home';
       state.cat = null;
       state.workId = null;
+      document.body.classList.remove('intro');
+      document.body.classList.remove('intro-soft');
+      void document.body.offsetHeight;
       render();
+      requestAnimationFrame(()=>{
+        document.body.classList.add('intro-soft');
+      });
     }
   });
 }
