@@ -1780,28 +1780,41 @@ function renderDetail(){
     ? links.join('')
     : '<span class="no-source">暂无原作地址 / No Source</span>';
 
-  /* 大图 */
+  /* 大图：先预加载图片，加载完成后再一次性渲染图片 + hint，避免布局跳变 */
   const box = document.getElementById('detailImg');
   const bigSrc = isHidden(w.id) ? '' : (w.full || w.thumb);
+  const phChar = (w.char || '?').slice(0,1);
   box.style.background = `linear-gradient(145deg,${w.c1},${w.c2})`;
-
-  const bigInner = bigSrc
-    ? `<img src="${bigSrc}" alt="${w.title}" data-ph="${(w.char || '?').slice(0,1)}">`
-    : `<span class="ph">${(w.char || '?').slice(0,1)}</span>`;
-
-  box.innerHTML = `
-    ${bigInner}
-    <span class="hint">点击图片全屏 · 点击空白处返回</span>
-  `;
-  bindImgFallback(box);
-
-  box.style.animation = 'none';
-  void box.offsetWidth;
-  box.style.animation = '';
+  box.innerHTML = '';
   box.onclick = (e) => {
     e.stopPropagation();
     openFull(w);
   };
+
+  const buildInner = (useImg) => {
+    const bigInner = useImg
+      ? `<img src="${bigSrc}" alt="${w.title}" data-ph="${phChar}">`
+      : `<span class="ph">${phChar}</span>`;
+
+    box.innerHTML = `
+      ${bigInner}
+      <span class="hint">点击图片全屏 · 点击空白处返回</span>
+    `;
+    bindImgFallback(box);
+
+    box.style.animation = 'none';
+    void box.offsetWidth;
+    box.style.animation = '';
+  };
+
+  if (bigSrc){
+    const preImg = new Image();
+    preImg.onload = () => buildInner(true);
+    preImg.onerror = () => buildInner(false);
+    preImg.src = bigSrc;
+  } else {
+    buildInner(false);
+  }
 
   const panel = document.getElementById('detailPanel');
   panel.classList.remove('expand');
