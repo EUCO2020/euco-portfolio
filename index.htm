@@ -692,7 +692,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .sort-wrap button{
     flex:1 1 0;
     min-width:0;
-    padding:14px 8px;
+    padding:12px 8px 13px;
     align-items:center;
     border-bottom:1px solid var(--line);
   }
@@ -709,7 +709,19 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   }
   .sort-wrap button[data-sort="date"] .zh::before{content:"时间"}
   .sort-wrap button[data-sort="name"] .zh::before{content:"角色名"}
-  .sort-wrap button .en{display:none}
+  .sort-wrap button .en{
+    display:block;
+    font-size:7.5px;
+    letter-spacing:.12em;
+    line-height:1;
+    margin-top:4px;
+    text-align:center;
+    color:var(--ink-3);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:100%;
+  }
 
   .search-wrap{
     width:100%;
