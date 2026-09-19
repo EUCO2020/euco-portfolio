@@ -386,6 +386,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 
 .detail-title .zh{font-size:clamp(1.5rem,2.6vw,2.05rem);font-weight:800;letter-spacing:.01em;line-height:1.2}
 .detail-title .en{font-size:9.5px;letter-spacing:.3em;margin-top:15px}
+.detail-close{display:none}
 
 .detail-meta{margin-top:46px;border-top:1px solid var(--line)}
 .meta-item{padding:22px 0;border-bottom:1px solid var(--line)}
@@ -505,6 +506,35 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .detail-panel-inner{
     width:100%;
     padding:28px 20px 40px;
+  }
+  /* 详情页标题行 + × 按钮 */
+  .detail-title-row{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .detail-title{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .detail-close{
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    width:48px;
+    height:48px;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    cursor:pointer;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .detail-close svg{
+    width:64%;
+    height:64%;
+    display:block;
   }
   .detail-img .hint{display:none}
 }
@@ -628,7 +658,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
     transition:max-height .32s cubic-bezier(.4,0,.2,1);
   }
   .mobile-cat-drop.open{
-    max-height:420px;
+    max-height:520px;
     border-bottom:1px solid var(--line-strong);
   }
   .mobile-cat-drop a{
@@ -974,10 +1004,18 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
     <aside class="detail-panel" id="detailPanel">
       <div class="detail-panel-inner">
 
-        <h2 class="detail-title">
-          <span class="zh" id="dTitleZh"></span>
-          <span class="en" id="dTitleEn"></span>
-        </h2>
+        <div class="detail-title-row">
+          <h2 class="detail-title">
+            <span class="zh" id="dTitleZh"></span>
+            <span class="en" id="dTitleEn"></span>
+          </h2>
+          <button class="detail-close" id="detailClose" aria-label="返回">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linecap="round">
+              <line x1="5" y1="5" x2="19" y2="19"/>
+              <line x1="19" y1="5" x2="5" y2="19"/>
+            </svg>
+          </button>
+        </div>
 
         <dl class="detail-meta">
           <div class="meta-item">
@@ -1012,18 +1050,6 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 
 <!-- 移动端：右上角三个按钮 -->
 <nav class="mobile-nav" id="mobileNav">
-  <button id="mHome" aria-label="主页">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 10.5L12 3l9 7.5"/>
-      <path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>
-    </svg>
-  </button>
-  <button id="mBack" aria-label="返回">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 14L4 9l5-5"/>
-      <path d="M4 9h10a6 6 0 0 1 6 6v1"/>
-    </svg>
-  </button>
   <button id="mMenu" aria-label="分类">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <line x1="4" y1="7" x2="20" y2="7"/>
@@ -1035,6 +1061,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 
 <!-- 移动端：分类下拉 -->
 <div class="mobile-cat-drop" id="mobileCatDrop">
+  <a data-action="mhome"><span class="zh">主页</span><span class="en">Home</span></a>
   <a data-cat="all"><span class="zh">全部作品</span><span class="en">All Works</span></a>
   <a data-cat="idol"><span class="zh">偶像类同人绘画</span><span class="en">Idol Doujin Illustration</span></a>
   <a data-cat="game"><span class="zh">游戏类同人绘画</span><span class="en">Game Doujin Illustration</span></a>
@@ -1830,6 +1857,27 @@ function renderDetail(){
   panel.classList.remove('expand');
   void panel.offsetWidth;
   panel.classList.add('expand');
+  /* 移动端 × 按钮：与标题等高 */
+  const titleRow = document.querySelector('.detail-title-row');
+  const closeBtn = document.getElementById('detailClose');
+  if (titleRow && closeBtn){
+    const measure = () => {
+      if (window.innerWidth > 820){
+        closeBtn.style.width = '';
+        closeBtn.style.height = '';
+        return;
+      }
+      const titleEl = titleRow.querySelector('.detail-title');
+      if (!titleEl) return;
+      const h = titleEl.offsetHeight;
+      if (h > 0){
+        closeBtn.style.width = h + 'px';
+        closeBtn.style.height = h + 'px';
+      }
+    };
+    requestAnimationFrame(measure);
+    setTimeout(measure, 200);
+  }
 }
 
 /* ============================================================
@@ -1957,11 +2005,24 @@ window.addEventListener('load', ()=>{
     });
   }
 
+  /* 详情页 × 返回 */
+  const detailClose = document.getElementById('detailClose');
+  if (detailClose){
+    detailClose.addEventListener('click', () => {
+      goBack();
+    });
+  }
+
+
   /* 移动端分类下拉的项 */
   document.querySelectorAll('#mobileCatDrop a').forEach(a => {
     a.addEventListener('click', () => {
       mobileCatDrop.classList.remove('open');
-      openCat(a.dataset.cat);
+      if (a.dataset.action === 'mhome'){
+        goHome();
+      } else if (a.dataset.cat){
+        openCat(a.dataset.cat);
+      }
     });
   });
 
