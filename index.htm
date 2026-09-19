@@ -1717,8 +1717,8 @@ function renderGrid(){
     );
   } else {
     list.sort((a, b) => {
-      const cmp = (a.charEn || a.char)
-        .localeCompare(b.charEn || b.char, 'en', { sensitivity:'base' });
+      const cmp = (a.char || a.charEn || '')
+        .localeCompare(b.char || b.charEn || '', 'zh-CN', { sensitivity:'base' });
       return state.sortDir === 'asc' ? cmp : -cmp;
     });
   }
