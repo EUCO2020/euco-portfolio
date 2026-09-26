@@ -404,16 +404,17 @@ body.intro-soft .home-cats{animation:fadeUp .55s ease .4s both}
 .detail-layout{display:flex;width:100%;min-height:100vh;align-items:stretch}
 
 .detail-panel{
-  width:460px;
+  width:0;
   overflow:hidden;
   background:var(--surface);
   border-right:1px solid var(--line-strong);
   flex-shrink:0;
   position:relative;
-  opacity:0;
-  animation:panelFadeIn .55s ease .08s forwards;
 }
-@keyframes panelFadeIn{to{opacity:1}}
+.detail-panel.expand{
+  animation:panelExpand .95s cubic-bezier(.65,0,.35,1) forwards;
+}
+@keyframes panelExpand{from{width:0}to{width:460px}}
 
 .detail-panel-inner{
   width:460px;
@@ -465,6 +466,7 @@ body.intro-soft .home-cats{animation:fadeUp .55s ease .4s both}
 .detail-img{
   max-width:100%;
   max-height:calc(100vh - 160px);
+  aspect-ratio: 1 / 1;   /* 默认占位 */
   border:1px solid var(--line-strong);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   overflow:hidden;
@@ -530,8 +532,10 @@ body.intro-soft .home-cats{animation:fadeUp .55s ease .4s both}
   }
 
   /* 信息在下 */
-  .detail-panel{
-    width:100%;
+  .detail-panel,
+  .detail-panel.expand{
+    animation:none !important;
+    width:100% !important;
     max-height:none;
     border-right:none;
     border-bottom:none;
@@ -1450,6 +1454,9 @@ function openCat(key){
 function openDetail(id){
   if (transitioning) return;
 
+  const w = WORKS.find(x => x.id === id);
+  if (!w) return;
+
   /* 记录缩略图在 index 页中的位置 */
   let originRect = null;
   const cardEl = document.querySelector(`.card[data-id="${id}"]`);
@@ -1461,19 +1468,41 @@ function openDetail(id){
     }
   }
 
+  const hidden = isHidden(id);
+  const fullSrc = hidden ? '' : (w.full || w.thumb);
+
+  if (!fullSrc){
+    enterDetail(id, originRect, 0, 0);
+    return;
+  }
+
+  /* 预加载 full，拿到宽高比后再进详情页 */
+  const preImg = new Image();
+  preImg.onload = () => enterDetail(id, originRect, preImg.naturalWidth, preImg.naturalHeight);
+  preImg.onerror = () => enterDetail(id, originRect, 0, 0);
+  preImg.src = fullSrc;
+}
+
+function enterDetail(id, originRect, fullW, fullH){
   transitioning = true;
+  setTimeout(() => { transitioning = false; }, 850);
 
-  pushNav();
-  state.view = 'detail';
-  state.workId = id;
-  pendingDetailOrigin = originRect;
-
-  /* 无遮罩直接切换 */
-  document.body.classList.remove('intro');
-  document.body.classList.remove('intro-soft');
-  render();
-
-  setTimeout(() => { transitioning = false; }, 820);
+  try {
+    pushNav();
+    state.view = 'detail';
+    state.workId = id;
+    pendingDetailOrigin = {
+      rect: originRect,
+      naturalWidth: fullW,
+      naturalHeight: fullH
+    };
+    document.body.classList.remove('intro');
+    document.body.classList.remove('intro-soft');
+    render();
+  } catch (err){
+    console.error('进入详情页失败：', err);
+    transitioning = false;
+  }
 }
 
 function goBack(){
@@ -1484,16 +1513,22 @@ function goBack(){
     /* 没有历史，直接回主页 */
     if (state.view === 'home') return;
     transitioning = true;
-    document.body.classList.remove('intro');
-    document.body.classList.remove('intro-soft');
-    state.view = 'home';
-    state.cat = null;
-    state.workId = null;
-    render();
-    requestAnimationFrame(() => {
-      document.body.classList.add('intro-soft');
-    });
     setTimeout(() => { transitioning = false; }, 600);
+
+    try {
+      document.body.classList.remove('intro');
+      document.body.classList.remove('intro-soft');
+      state.view = 'home';
+      state.cat = null;
+      state.workId = null;
+      render();
+      requestAnimationFrame(() => {
+        document.body.classList.add('intro-soft');
+      });
+    } catch (err) {
+      console.error('返回主页失败：', err);
+      transitioning = false;
+    }
     return;
   }
 
@@ -1519,115 +1554,138 @@ function goBack(){
   const input = document.getElementById('searchInput');
   if (input) input.value = state.search || '';
 
-  /* 从 detail 返回 index：用飞行副本做逆向缩放 */
+  /* 分支一：从 detail 返回 index：飞行副本做逆向缩放 */
   if (fromDetail && state.view === 'index' && detailImgRect){
     transitioning = true;
+    setTimeout(() => { transitioning = false; }, 780);
 
-    const grid = document.getElementById('workGrid');
-    if (grid) grid.classList.add('no-anim');
+    try {
+      const grid = document.getElementById('workGrid');
+      if (grid) grid.classList.add('no-anim');
 
-    document.body.classList.remove('intro');
-    document.body.classList.remove('intro-soft');
-    render(prev.scrollY || 0);
+      document.body.classList.remove('intro');
+      document.body.classList.remove('intro-soft');
 
-    requestAnimationFrame(() => {
+      /* 先渲染，但锁住卡片动画 */
+      render(prev.scrollY || 0);
+
       requestAnimationFrame(() => {
-        const cardEl = document.querySelector(`.card[data-id="${prevWorkId}"]`);
-        const thumbEl = cardEl ? cardEl.querySelector('.thumb') : null;
+        requestAnimationFrame(() => {
+          try {
+            const cardEl = document.querySelector(`.card[data-id="${prevWorkId}"]`);
+            const thumbEl = cardEl ? cardEl.querySelector('.thumb') : null;
 
-        if (!thumbEl){
-          if (grid) grid.classList.remove('no-anim');
-          transitioning = false;
-          return;
-        }
+            if (!thumbEl){
+              if (grid) grid.classList.remove('no-anim');
+              transitioning = false;
+              return;
+            }
 
-        const targetRect = thumbEl.getBoundingClientRect();
-        if (!targetRect.width || !targetRect.height){
-          if (grid) grid.classList.remove('no-anim');
-          transitioning = false;
-          return;
-        }
+            const targetRect = thumbEl.getBoundingClientRect();
+            if (!targetRect.width || !targetRect.height){
+              if (grid) grid.classList.remove('no-anim');
+              transitioning = false;
+              return;
+            }
 
-        /* 隐藏目标卡片缩略图，飞完后显示 */
-        thumbEl.style.visibility = 'hidden';
+            thumbEl.style.visibility = 'hidden';
 
-        /* 创建飞行副本 */
-        const flying = document.createElement('div');
-        flying.style.cssText = `
-          position:fixed;
-          left:${detailImgRect.left}px;
-          top:${detailImgRect.top}px;
-          width:${detailImgRect.width}px;
-          height:${detailImgRect.height}px;
-          z-index:700;
-          pointer-events:none;
-          border:1px solid var(--line-strong);
-          background:var(--surface);
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          overflow:hidden;
-          will-change:transform,opacity;
-        `;
+            /* 创建飞行副本 */
+            const flying = document.createElement('div');
+            flying.style.cssText = `
+              position:fixed;
+              left:${detailImgRect.left}px;
+              top:${detailImgRect.top}px;
+              width:${detailImgRect.width}px;
+              height:${detailImgRect.height}px;
+              z-index:700;
+              pointer-events:none;
+              border:1px solid var(--line-strong);
+              background:var(--surface);
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              overflow:hidden;
+              will-change:left,top,width,height,opacity;
+            `;
 
-        if (detailImgSrc){
-          const img = document.createElement('img');
-          img.src = detailImgSrc;
-          img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
-          flying.appendChild(img);
-        } else {
-          const ph = document.createElement('span');
-          ph.style.cssText = 'font-size:60px;font-weight:800;color:rgba(17,17,17,.82);line-height:1;';
-          ph.textContent = '?';
-          flying.appendChild(ph);
-        }
+            if (detailImgSrc){
+              const img = document.createElement('img');
+              img.src = detailImgSrc;
+              img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
+              flying.appendChild(img);
+            } else {
+              const ph = document.createElement('span');
+              ph.style.cssText = 'font-size:60px;font-weight:800;color:rgba(17,17,17,.82);line-height:1;';
+              ph.textContent = '?';
+              flying.appendChild(ph);
+            }
 
-        document.body.appendChild(flying);
+            document.body.appendChild(flying);
 
-        const sx = targetRect.width / detailImgRect.width;
-        const sy = targetRect.height / detailImgRect.height;
-        const dx = (targetRect.left + targetRect.width/2) - (detailImgRect.left + detailImgRect.width/2);
-        const dy = (targetRect.top + targetRect.height/2) - (detailImgRect.top + detailImgRect.height/2);
+            flying.style.transition = 'none';
 
-        flying.style.transition = 'none';
-        flying.style.transformOrigin = 'center center';
+            void flying.offsetWidth;
 
-        void flying.offsetWidth;
+            flying.style.transition = 'left .65s cubic-bezier(.34,1.15,.64,1), top .65s cubic-bezier(.34,1.15,.64,1), width .65s cubic-bezier(.34,1.15,.64,1), height .65s cubic-bezier(.34,1.15,.64,1), opacity .4s ease .15s';
+            flying.style.left = targetRect.left + 'px';
+            flying.style.top = targetRect.top + 'px';
+            flying.style.width = targetRect.width + 'px';
+            flying.style.height = targetRect.height + 'px';
+            flying.style.opacity = '0';
 
-        flying.style.transition = 'transform .6s cubic-bezier(.34,1.15,.64,1), opacity .45s ease .12s';
-        flying.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-        flying.style.opacity = '0';
-
-        setTimeout(() => {
-          flying.remove();
-          thumbEl.style.visibility = '';
-          if (grid) grid.classList.remove('no-anim');
-          transitioning = false;
-        }, 620);
+            setTimeout(() => {
+              flying.remove();
+              thumbEl.style.visibility = '';
+              if (grid) grid.classList.remove('no-anim');
+              transitioning = false;
+            }, 800);
+          } catch (err) {
+            console.error('飞行副本失败：', err);
+            const g = document.getElementById('workGrid');
+            if (g) g.classList.remove('no-anim');
+            transitioning = false;
+          }
+        });
       });
-    });
+    } catch (err) {
+      console.error('返回索引页失败：', err);
+      transitioning = false;
+    }
 
     return;
   }
 
-  /* 返回主页：走轻量淡入 */
+  /* 分支二：返回主页：轻量淡入 */
   if (state.view === 'home'){
     transitioning = true;
-    document.body.classList.remove('intro');
-    document.body.classList.remove('intro-soft');
-    void document.body.offsetHeight;
-    render(prev.scrollY || 0);
-    requestAnimationFrame(() => {
-      document.body.classList.add('intro-soft');
-    });
     setTimeout(() => { transitioning = false; }, 600);
+
+    try {
+      document.body.classList.remove('intro');
+      document.body.classList.remove('intro-soft');
+      void document.body.offsetHeight;
+      render(prev.scrollY || 0);
+      requestAnimationFrame(() => {
+        document.body.classList.add('intro-soft');
+      });
+    } catch (err) {
+      console.error('返回主页失败：', err);
+      transitioning = false;
+    }
     return;
   }
 
-  /* 其他情况 */
+  /* 分支三：其他情况 */
   transitioning = true;
-  render(prev.scrollY || 0);
   setTimeout(() => { transitioning = false; }, 400);
+
+  try {
+    render(prev.scrollY || 0);
+  } catch (err) {
+    console.error('页面渲染失败：', err);
+    transitioning = false;
+  }
 }
 /* ============================================================
    7. Index 渲染
@@ -1899,6 +1957,7 @@ function renderGrid(){
   }
 
   const grid = document.getElementById('workGrid');
+  const noAnim = grid.classList.contains('no-anim');
   grid.innerHTML = '';
   if (!list.length){
     grid.innerHTML = '<p class="empty">暂无作品 / No Works</p>';
@@ -1906,7 +1965,11 @@ function renderGrid(){
   }
   list.forEach((w, i) => {
     const card = makeCard(w);
-    card.style.setProperty('--stagger', Math.min(i, 18) * 28 + 'ms');
+    if (noAnim){
+      card.style.animation = 'none';
+    } else {
+      card.style.setProperty('--stagger', Math.min(i, 18) * 28 + 'ms');
+    }
     grid.appendChild(card);
   });
 }
@@ -1933,17 +1996,6 @@ function bindImgFallback(container){
   });
 }
 
-function bindImgFallback(container){
-  container.querySelectorAll('img').forEach(img => {
-    img.addEventListener('error', () => {
-      const ph = img.dataset.ph || '?';
-      const span = document.createElement('span');
-      span.className = 'ph';
-      span.textContent = ph;
-      img.replaceWith(span);
-    });
-  });
-}
 
 function makeCard(w){
   const card = document.createElement('article');
@@ -2019,13 +2071,23 @@ function renderDetail(){
     ? links.join('')
     : '<span class="no-source">暂无原作地址 / No Source</span>';
 
-  /* 大图：先用 thumb 显示，full 异步加载后替换 */
+  /* 大图 */
   const box = document.getElementById('detailImg');
   const hidden = isHidden(w.id);
   const fullSrc = hidden ? '' : (w.full || w.thumb);
   const thumbSrc = hidden ? '' : w.thumb;
   const phChar = (w.char || '?').slice(0,1);
   box.style.background = `linear-gradient(145deg,${w.c1},${w.c2})`;
+
+  const info = pendingDetailOrigin;
+  pendingDetailOrigin = null;
+
+  /* 按 full 的宽高比设置容器 aspect-ratio */
+  if (info && info.naturalWidth && info.naturalHeight){
+    box.style.aspectRatio = info.naturalWidth + ' / ' + info.naturalHeight;
+  } else {
+    box.style.aspectRatio = '';
+  }
 
   const initialSrc = thumbSrc || fullSrc;
   const bigInner = initialSrc
@@ -2043,38 +2105,53 @@ function renderDetail(){
     openFull(w);
   };
 
-  /* 飞入动画期间隐藏 hint，避免跟着一起缩放 */
   const hintEl = box.querySelector('.hint');
   if (hintEl) hintEl.style.opacity = '0';
 
-  /* 卡片飞入动画 */
-  const originRect = pendingDetailOrigin;
-  pendingDetailOrigin = null;
-
+  /* 卡片飞入动画：用 left/top/width/height 过渡，避免非等比拉伸 */
+  const originRect = info && info.rect;
   if (originRect){
     requestAnimationFrame(() => {
       const targetRect = box.getBoundingClientRect();
-      if (!targetRect.width || !targetRect.height) return;
+      if (!targetRect.width || !targetRect.height){
+        if (hintEl) hintEl.style.opacity = '';
+        return;
+      }
 
-      const sx = originRect.width / targetRect.width;
-      const sy = originRect.height / targetRect.height;
-      const dx = (originRect.left + originRect.width/2) - (targetRect.left + targetRect.width/2);
-      const dy = (originRect.top + originRect.height/2) - (targetRect.top + targetRect.height/2);
+      const originalPosition = getComputedStyle(box).position;
+      const originalLeft = box.style.left;
+      const originalTop = box.style.top;
+      const originalWidth = box.style.width;
+      const originalHeight = box.style.height;
+      const originalZ = box.style.zIndex;
+      const originalTransition = box.style.transition;
 
-      box.style.transformOrigin = 'center center';
+      box.style.position = 'fixed';
+      box.style.margin = '0';
+      box.style.left = originRect.left + 'px';
+      box.style.top = originRect.top + 'px';
+      box.style.width = originRect.width + 'px';
+      box.style.height = originRect.height + 'px';
+      box.style.zIndex = '700';
       box.style.transition = 'none';
-      box.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-      box.style.opacity = '0.6';
 
       void box.offsetWidth;
 
-      box.style.transition = 'transform .72s cubic-bezier(.22,.9,.24,1), opacity .45s ease';
-      box.style.transform = '';
-      box.style.opacity = '';
+      box.style.transition = 'left .72s cubic-bezier(.22,.9,.24,1), top .72s cubic-bezier(.22,.9,.24,1), width .72s cubic-bezier(.22,.9,.24,1), height .72s cubic-bezier(.22,.9,.24,1)';
+      box.style.left = targetRect.left + 'px';
+      box.style.top = targetRect.top + 'px';
+      box.style.width = targetRect.width + 'px';
+      box.style.height = targetRect.height + 'px';
 
       setTimeout(() => {
-        box.style.transition = '';
-        box.style.transformOrigin = '';
+        box.style.position = originalPosition === 'static' ? '' : originalPosition;
+        box.style.left = originalLeft;
+        box.style.top = originalTop;
+        box.style.width = originalWidth;
+        box.style.height = originalHeight;
+        box.style.zIndex = originalZ;
+        box.style.margin = '';
+        box.style.transition = originalTransition;
         if (hintEl) hintEl.style.opacity = '';
       }, 780);
     });
@@ -2093,7 +2170,6 @@ function renderDetail(){
     };
     preImg.src = fullSrc;
   }
-
   /* 移动端 × 按钮与标题等高 */
   const titleRow = document.querySelector('.detail-title-row');
   const closeBtn = document.getElementById('detailClose');
@@ -2114,6 +2190,14 @@ function renderDetail(){
     };
     requestAnimationFrame(measure);
     setTimeout(measure, 200);
+  }
+
+  /* 左侧信息面板从左向右展开 */
+  const panel = document.getElementById('detailPanel');
+  if (panel){
+    panel.classList.remove('expand');
+    void panel.offsetWidth;
+    panel.classList.add('expand');
   }
 }
 
@@ -2146,21 +2230,33 @@ function openFull(w){
       const toRect = lbInner.getBoundingClientRect();
       if (!toRect.width || !toRect.height) return;
 
-      const sx = fromRect.width / toRect.width;
-      const sy = fromRect.height / toRect.height;
-      const dx = (fromRect.left + fromRect.width/2) - (toRect.left + toRect.width/2);
-      const dy = (fromRect.top + fromRect.height/2) - (toRect.top + toRect.height/2);
-
+      lbInner.style.position = 'fixed';
+      lbInner.style.margin = '0';
+      lbInner.style.left = fromRect.left + 'px';
+      lbInner.style.top = fromRect.top + 'px';
+      lbInner.style.width = fromRect.width + 'px';
+      lbInner.style.height = fromRect.height + 'px';
       lbInner.style.transition = 'none';
-      lbInner.style.transformOrigin = 'center center';
-      lbInner.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-      lbInner.style.opacity = '0.5';
+      lbInner.style.opacity = '0.6';
 
       void lbInner.offsetWidth;
 
-      lbInner.style.transition = 'transform .58s cubic-bezier(.22,.9,.24,1), opacity .45s ease';
-      lbInner.style.transform = '';
+      lbInner.style.transition = 'left .58s cubic-bezier(.22,.9,.24,1), top .58s cubic-bezier(.22,.9,.24,1), width .58s cubic-bezier(.22,.9,.24,1), height .58s cubic-bezier(.22,.9,.24,1), opacity .45s ease';
+      lbInner.style.left = toRect.left + 'px';
+      lbInner.style.top = toRect.top + 'px';
+      lbInner.style.width = toRect.width + 'px';
+      lbInner.style.height = toRect.height + 'px';
       lbInner.style.opacity = '1';
+
+      setTimeout(() => {
+        lbInner.style.position = '';
+        lbInner.style.left = '';
+        lbInner.style.top = '';
+        lbInner.style.width = '';
+        lbInner.style.height = '';
+        lbInner.style.transition = '';
+        lbInner.style.opacity = '';
+      }, 620);
     });
   }
 }
@@ -2182,9 +2278,22 @@ function closeLightbox(){
       const dx = (toRect.left + toRect.width/2) - (fromRect.left + fromRect.width/2);
       const dy = (toRect.top + toRect.height/2) - (fromRect.top + fromRect.height/2);
 
-      lbInner.style.transition = 'transform .45s cubic-bezier(.4,0,.6,1), opacity .4s ease';
       lbInner.style.transformOrigin = 'center center';
-      lbInner.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+      lbInner.style.position = 'fixed';
+      lbInner.style.margin = '0';
+      lbInner.style.left = fromRect.left + 'px';
+      lbInner.style.top = fromRect.top + 'px';
+      lbInner.style.width = fromRect.width + 'px';
+      lbInner.style.height = fromRect.height + 'px';
+      lbInner.style.transition = 'none';
+
+      void lbInner.offsetWidth;
+
+      lbInner.style.transition = 'left .45s cubic-bezier(.4,0,.6,1), top .45s cubic-bezier(.4,0,.6,1), width .45s cubic-bezier(.4,0,.6,1), height .45s cubic-bezier(.4,0,.6,1), opacity .4s ease';
+      lbInner.style.left = toRect.left + 'px';
+      lbInner.style.top = toRect.top + 'px';
+      lbInner.style.width = toRect.width + 'px';
+      lbInner.style.height = toRect.height + 'px';
       lbInner.style.opacity = '0';
 
       setTimeout(() => {
