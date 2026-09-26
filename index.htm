@@ -351,6 +351,7 @@ body.intro-soft .home-cats{animation:fadeUp .55s ease .4s both}
 @media(max-width:1280px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 14px;margin-top:44px}}
+.grid.no-anim .card{animation:none !important}
 
 .card{
   cursor:pointer;
@@ -403,12 +404,17 @@ body.intro-soft .home-cats{animation:fadeUp .55s ease .4s both}
 .detail-layout{display:flex;width:100%;min-height:100vh;align-items:stretch}
 
 .detail-panel{
-  width:0;overflow:hidden;background:var(--surface);
+  width:460px;
+  overflow:hidden;
+  background:var(--surface);
   border-right:1px solid var(--line-strong);
-  flex-shrink:0;position:relative;
+  flex-shrink:0;
+  position:relative;
+  opacity:0;
+  animation:panelFadeIn .55s ease .08s forwards;
 }
-.detail-panel.expand{animation:panelExpand .95s cubic-bezier(.65,0,.35,1) forwards}
-@keyframes panelExpand{from{width:0}to{width:460px}}
+@keyframes panelFadeIn{to{opacity:1}}
+
 .detail-panel-inner{
   width:460px;
   padding:34px 46px 40px;
@@ -524,9 +530,7 @@ body.intro-soft .home-cats{animation:fadeUp .55s ease .4s both}
   }
 
   /* 信息在下 */
-  .detail-panel,
-  .detail-panel.expand{
-    animation:none;
+  .detail-panel{
     width:100%;
     max-height:none;
     border-right:none;
@@ -1446,7 +1450,7 @@ function openCat(key){
 function openDetail(id){
   if (transitioning) return;
 
-  /* 过渡之前捕获卡片缩略图的位置 */
+  /* 记录缩略图在 index 页中的位置 */
   let originRect = null;
   const cardEl = document.querySelector(`.card[data-id="${id}"]`);
   if (cardEl){
@@ -1457,64 +1461,174 @@ function openDetail(id){
     }
   }
 
-  /* 有起点时：跳过全屏遮罩，让卡片飞入 + 左侧面板展开作为过渡 */
-  if (originRect){
-    transitioning = true;
-    pushNav();
-    state.view = 'detail';
-    state.workId = id;
-    pendingDetailOrigin = originRect;
-    render();
-    setTimeout(() => { transitioning = false; }, 850);
-    return;
-  }
+  transitioning = true;
 
-  /* 罕见情况：拿不到起点，退回原来的遮罩过渡 */
-  transitionTo(() => {
-    pushNav();
-    state.view = 'detail';
-    state.workId = id;
-    pendingDetailOrigin = null;
-    render();
-  });
+  pushNav();
+  state.view = 'detail';
+  state.workId = id;
+  pendingDetailOrigin = originRect;
+
+  /* 无遮罩直接切换 */
+  document.body.classList.remove('intro');
+  document.body.classList.remove('intro-soft');
+  render();
+
+  setTimeout(() => { transitioning = false; }, 820);
 }
 
 function goBack(){
-  transitionTo(()=>{
-    const prev = navStack.pop();
-    if (prev){
-      const scrollY = prev.scrollY || 0;
-      Object.assign(state, prev);
-      const input = document.getElementById('searchInput');
-      if (input) input.value = state.search || '';
+  if (transitioning) return;
 
-      if (state.view === 'home'){
-        /* 回到主页：跳过 ID 动画 */
-        document.body.classList.remove('intro');
-        document.body.classList.remove('intro-soft');
-        void document.body.offsetHeight;
-        render(scrollY);
-        requestAnimationFrame(()=>{
-          document.body.classList.add('intro-soft');
-        });
-      } else {
-        render(scrollY);
+  const prev = navStack.pop();
+  if (!prev){
+    /* 没有历史，直接回主页 */
+    if (state.view === 'home') return;
+    transitioning = true;
+    document.body.classList.remove('intro');
+    document.body.classList.remove('intro-soft');
+    state.view = 'home';
+    state.cat = null;
+    state.workId = null;
+    render();
+    requestAnimationFrame(() => {
+      document.body.classList.add('intro-soft');
+    });
+    setTimeout(() => { transitioning = false; }, 600);
+    return;
+  }
+
+  const fromDetail = (state.view === 'detail');
+  const prevWorkId = state.workId;
+
+  /* 进入 detail 前，捕获当前大图的位置和内容 */
+  let detailImgRect = null;
+  let detailImgSrc = null;
+  if (fromDetail){
+    const box = document.getElementById('detailImg');
+    if (box){
+      const r = box.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0){
+        detailImgRect = r;
+        const img = box.querySelector('img');
+        if (img) detailImgSrc = img.getAttribute('src');
       }
-    } else {
-      state.view = 'home';
-      state.cat = null;
-      state.workId = null;
-      document.body.classList.remove('intro');
-      document.body.classList.remove('intro-soft');
-      void document.body.offsetHeight;
-      render();
-      requestAnimationFrame(()=>{
-        document.body.classList.add('intro-soft');
-      });
     }
-  });
-}
+  }
 
+  Object.assign(state, prev);
+  const input = document.getElementById('searchInput');
+  if (input) input.value = state.search || '';
+
+  /* 从 detail 返回 index：用飞行副本做逆向缩放 */
+  if (fromDetail && state.view === 'index' && detailImgRect){
+    transitioning = true;
+
+    const grid = document.getElementById('workGrid');
+    if (grid) grid.classList.add('no-anim');
+
+    document.body.classList.remove('intro');
+    document.body.classList.remove('intro-soft');
+    render(prev.scrollY || 0);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const cardEl = document.querySelector(`.card[data-id="${prevWorkId}"]`);
+        const thumbEl = cardEl ? cardEl.querySelector('.thumb') : null;
+
+        if (!thumbEl){
+          if (grid) grid.classList.remove('no-anim');
+          transitioning = false;
+          return;
+        }
+
+        const targetRect = thumbEl.getBoundingClientRect();
+        if (!targetRect.width || !targetRect.height){
+          if (grid) grid.classList.remove('no-anim');
+          transitioning = false;
+          return;
+        }
+
+        /* 隐藏目标卡片缩略图，飞完后显示 */
+        thumbEl.style.visibility = 'hidden';
+
+        /* 创建飞行副本 */
+        const flying = document.createElement('div');
+        flying.style.cssText = `
+          position:fixed;
+          left:${detailImgRect.left}px;
+          top:${detailImgRect.top}px;
+          width:${detailImgRect.width}px;
+          height:${detailImgRect.height}px;
+          z-index:700;
+          pointer-events:none;
+          border:1px solid var(--line-strong);
+          background:var(--surface);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          overflow:hidden;
+          will-change:transform,opacity;
+        `;
+
+        if (detailImgSrc){
+          const img = document.createElement('img');
+          img.src = detailImgSrc;
+          img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;';
+          flying.appendChild(img);
+        } else {
+          const ph = document.createElement('span');
+          ph.style.cssText = 'font-size:60px;font-weight:800;color:rgba(17,17,17,.82);line-height:1;';
+          ph.textContent = '?';
+          flying.appendChild(ph);
+        }
+
+        document.body.appendChild(flying);
+
+        const sx = targetRect.width / detailImgRect.width;
+        const sy = targetRect.height / detailImgRect.height;
+        const dx = (targetRect.left + targetRect.width/2) - (detailImgRect.left + detailImgRect.width/2);
+        const dy = (targetRect.top + targetRect.height/2) - (detailImgRect.top + detailImgRect.height/2);
+
+        flying.style.transition = 'none';
+        flying.style.transformOrigin = 'center center';
+
+        void flying.offsetWidth;
+
+        flying.style.transition = 'transform .6s cubic-bezier(.34,1.15,.64,1), opacity .45s ease .12s';
+        flying.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+        flying.style.opacity = '0';
+
+        setTimeout(() => {
+          flying.remove();
+          thumbEl.style.visibility = '';
+          if (grid) grid.classList.remove('no-anim');
+          transitioning = false;
+        }, 620);
+      });
+    });
+
+    return;
+  }
+
+  /* 返回主页：走轻量淡入 */
+  if (state.view === 'home'){
+    transitioning = true;
+    document.body.classList.remove('intro');
+    document.body.classList.remove('intro-soft');
+    void document.body.offsetHeight;
+    render(prev.scrollY || 0);
+    requestAnimationFrame(() => {
+      document.body.classList.add('intro-soft');
+    });
+    setTimeout(() => { transitioning = false; }, 600);
+    return;
+  }
+
+  /* 其他情况 */
+  transitioning = true;
+  render(prev.scrollY || 0);
+  setTimeout(() => { transitioning = false; }, 400);
+}
 /* ============================================================
    7. Index 渲染
    ============================================================ */
@@ -1883,7 +1997,7 @@ function renderDetail(){
   document.getElementById('dDateZh').textContent = w.date;
   document.getElementById('dDateEn').textContent = w.date;
 
-  /* 原作地址：按需渲染 */
+  /* 原作地址 */
   const links = [];
   if (w.pixiv){
     links.push(`
@@ -1905,80 +2019,82 @@ function renderDetail(){
     ? links.join('')
     : '<span class="no-source">暂无原作地址 / No Source</span>';
 
-  /* 大图：先预加载图片，加载完成后再一次性渲染图片 + hint，避免布局跳变 */
+  /* 大图：先用 thumb 显示，full 异步加载后替换 */
   const box = document.getElementById('detailImg');
-  const bigSrc = isHidden(w.id) ? '' : (w.full || w.thumb);
+  const hidden = isHidden(w.id);
+  const fullSrc = hidden ? '' : (w.full || w.thumb);
+  const thumbSrc = hidden ? '' : w.thumb;
   const phChar = (w.char || '?').slice(0,1);
   box.style.background = `linear-gradient(145deg,${w.c1},${w.c2})`;
-  box.innerHTML = '';
+
+  const initialSrc = thumbSrc || fullSrc;
+  const bigInner = initialSrc
+    ? `<img src="${initialSrc}" alt="${w.title}" data-ph="${phChar}">`
+    : `<span class="ph">${phChar}</span>`;
+
+  box.innerHTML = `
+    ${bigInner}
+    <span class="hint">点击图片全屏 · 点击空白处返回</span>
+  `;
+  bindImgFallback(box);
+
   box.onclick = (e) => {
     e.stopPropagation();
     openFull(w);
   };
 
-  const buildInner = (useImg) => {
-    const bigInner = useImg
-      ? `<img src="${bigSrc}" alt="${w.title}" data-ph="${phChar}">`
-      : `<span class="ph">${phChar}</span>`;
+  /* 飞入动画期间隐藏 hint，避免跟着一起缩放 */
+  const hintEl = box.querySelector('.hint');
+  if (hintEl) hintEl.style.opacity = '0';
 
-    box.innerHTML = `
-      ${bigInner}
-      <span class="hint">点击图片全屏 · 点击空白处返回</span>
-    `;
-    bindImgFallback(box);
+  /* 卡片飞入动画 */
+  const originRect = pendingDetailOrigin;
+  pendingDetailOrigin = null;
 
-    /* 卡片飞入详情：从缩略图位置和尺寸动画到详情图位置 */
-    if (pendingDetailOrigin){
-      requestAnimationFrame(() => {
-        const targetRect = box.getBoundingClientRect();
-        const ox = pendingDetailOrigin;
-        pendingDetailOrigin = null;
-        if (!targetRect.width || !targetRect.height) return;
+  if (originRect){
+    requestAnimationFrame(() => {
+      const targetRect = box.getBoundingClientRect();
+      if (!targetRect.width || !targetRect.height) return;
 
-        const sx = ox.width / targetRect.width;
-        const sy = ox.height / targetRect.height;
-        const dx = (ox.left + ox.width/2) - (targetRect.left + targetRect.width/2);
-        const dy = (ox.top + ox.height/2) - (targetRect.top + targetRect.height/2);
+      const sx = originRect.width / targetRect.width;
+      const sy = originRect.height / targetRect.height;
+      const dx = (originRect.left + originRect.width/2) - (targetRect.left + targetRect.width/2);
+      const dy = (originRect.top + originRect.height/2) - (targetRect.top + targetRect.height/2);
 
-        box.style.transition = 'none';
-        box.style.transformOrigin = 'center center';
-        box.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-        box.style.opacity = '0.55';
+      box.style.transformOrigin = 'center center';
+      box.style.transition = 'none';
+      box.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+      box.style.opacity = '0.6';
 
-        void box.offsetWidth;
-
-        box.style.transition = 'transform .75s cubic-bezier(.22,.9,.24,1), opacity .5s ease';
-        box.style.transform = '';
-        box.style.opacity = '';
-
-        setTimeout(() => {
-          box.style.transition = '';
-          box.style.transform = '';
-          box.style.transformOrigin = '';
-          box.style.opacity = '';
-        }, 800);
-      });
-    } else {
-      box.style.animation = 'none';
       void box.offsetWidth;
-      box.style.animation = '';
-    }
-  };
 
-  if (bigSrc){
-    const preImg = new Image();
-    preImg.onload = () => buildInner(true);
-    preImg.onerror = () => buildInner(false);
-    preImg.src = bigSrc;
+      box.style.transition = 'transform .72s cubic-bezier(.22,.9,.24,1), opacity .45s ease';
+      box.style.transform = '';
+      box.style.opacity = '';
+
+      setTimeout(() => {
+        box.style.transition = '';
+        box.style.transformOrigin = '';
+        if (hintEl) hintEl.style.opacity = '';
+      }, 780);
+    });
   } else {
-    buildInner(false);
+    if (hintEl) hintEl.style.opacity = '';
   }
 
-  const panel = document.getElementById('detailPanel');
-  panel.classList.remove('expand');
-  void panel.offsetWidth;
-  panel.classList.add('expand');
-  /* 移动端 × 按钮：与标题等高 */
+  /* full 加载完成后替换当前图片 */
+  if (initialSrc && fullSrc && initialSrc !== fullSrc){
+    const preImg = new Image();
+    preImg.onload = () => {
+      const currentImg = box.querySelector('img');
+      if (currentImg && currentImg.getAttribute('src') !== fullSrc){
+        currentImg.src = fullSrc;
+      }
+    };
+    preImg.src = fullSrc;
+  }
+
+  /* 移动端 × 按钮与标题等高 */
   const titleRow = document.querySelector('.detail-title-row');
   const closeBtn = document.getElementById('detailClose');
   if (titleRow && closeBtn){
