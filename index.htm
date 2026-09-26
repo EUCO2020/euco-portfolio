@@ -1444,19 +1444,37 @@ function openCat(key){
 }
 
 function openDetail(id){
+  if (transitioning) return;
+
   /* 过渡之前捕获卡片缩略图的位置 */
   let originRect = null;
   const cardEl = document.querySelector(`.card[data-id="${id}"]`);
   if (cardEl){
     const thumb = cardEl.querySelector('.thumb');
-    if (thumb) originRect = thumb.getBoundingClientRect();
+    if (thumb){
+      const r = thumb.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) originRect = r;
+    }
   }
 
-  transitionTo(()=>{
+  /* 有起点时：跳过全屏遮罩，让卡片飞入 + 左侧面板展开作为过渡 */
+  if (originRect){
+    transitioning = true;
     pushNav();
     state.view = 'detail';
     state.workId = id;
     pendingDetailOrigin = originRect;
+    render();
+    setTimeout(() => { transitioning = false; }, 850);
+    return;
+  }
+
+  /* 罕见情况：拿不到起点，退回原来的遮罩过渡 */
+  transitionTo(() => {
+    pushNav();
+    state.view = 'detail';
+    state.workId = id;
+    pendingDetailOrigin = null;
     render();
   });
 }
