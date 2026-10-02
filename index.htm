@@ -615,18 +615,19 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
     display:grid;
     place-items:center;
     flex:0 0 auto;
-    width:48px;
-    height:48px;
+    width:28px;
+    height:28px;
     border:none;
     background:transparent;
-    color:var(--ink);
+    color:var(--swiss);
     cursor:pointer;
     padding:0;
+    align-self:flex-start;
     -webkit-tap-highlight-color:transparent;
   }
   .detail-close svg{
-    width:64%;
-    height:64%;
+    width:100%;
+    height:100%;
     display:block;
   }
   .detail-img .hint{display:none}
@@ -1172,9 +1173,9 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
             <span class="en" id="dTitleEn"></span>
           </h2>
           <button class="detail-close" id="detailClose" aria-label="返回">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linecap="round">
-              <line x1="5" y1="5" x2="19" y2="19"/>
-              <line x1="19" y1="5" x2="5" y2="19"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter">
+              <line x1="20" y1="12" x2="4" y2="12"/>
+              <polyline points="11 5 4 12 11 19"/>
             </svg>
           </button>
         </div>
@@ -2072,27 +2073,6 @@ function renderDetail(){
   panel.classList.remove('expand');
   void panel.offsetWidth;
   panel.classList.add('expand');
-  /* 移动端 × 按钮：与标题等高 */
-  const titleRow = document.querySelector('.detail-title-row');
-  const closeBtn = document.getElementById('detailClose');
-  if (titleRow && closeBtn){
-    const measure = () => {
-      if (window.innerWidth > 820){
-        closeBtn.style.width = '';
-        closeBtn.style.height = '';
-        return;
-      }
-      const titleEl = titleRow.querySelector('.detail-title');
-      if (!titleEl) return;
-      const h = titleEl.offsetHeight;
-      if (h > 0){
-        closeBtn.style.width = h + 'px';
-        closeBtn.style.height = h + 'px';
-      }
-    };
-    requestAnimationFrame(measure);
-    setTimeout(measure, 200);
-  }
 }
 
 /* ============================================================
