@@ -180,6 +180,21 @@ body{
   color:var(--ink-3);
   text-transform:uppercase;
 }
+.nav-foot .year-block{
+  display:inline-flex;
+  flex-direction:column;
+  align-items:flex-start;
+  line-height:1;
+  gap:12px;
+}
+.nav-foot .year-block .dash-line{
+  align-self:center;
+  display:block;
+  width:1px;
+  height:10px;
+  background:var(--ink-3);
+}
+
 /* ============================================================
    视图
    ============================================================ */
@@ -347,9 +362,8 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 .subtab .zh{font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink);transition:color .35s ease}
 .subtab .en{font-size:8px;letter-spacing:.15em;margin-top:6px;color:var(--ink-3);transition:color .35s ease}
 .subtab:hover:not(.active){background:var(--hover)}
-.subtab.active .zh{color:var(--surface)}
+.subtab.active .zh{color:#fff}
 .subtab.active .en{color:rgba(255,255,255,.6)}
-
 /* 工具栏 */
 .toolbar{
   display:flex;align-items:stretch;
@@ -401,7 +415,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 }
 .sort-wrap button:hover:not(.active){background:var(--hover)}
 .sort-wrap button:hover:not(.active) .zh{color:var(--ink)}
-.sort-wrap button.active .zh{color:var(--surface)}
+.sort-wrap button.active .zh{color:#fff}
 .sort-wrap button.active .en{color:rgba(255,255,255,.55)}
 
 .search-wrap{
@@ -436,11 +450,28 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   display:grid;place-items:center;overflow:hidden;
   transition:border-color .3s ease;background:var(--surface);
   position:relative;
+  container-type:inline-size;
 }
 .card:hover .thumb{border-color:var(--ink)}
 .card .thumb .ph{
-  font-size:clamp(30px,3.6vw,46px);font-weight:800;
-  color:var(--ink); letter-spacing:.04em;line-height:1;
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:8%;
+  box-sizing:border-box;
+  font-size:22cqw;
+  font-weight:900;
+  letter-spacing:-.03em;
+  line-height:.9;
+  color:#f7f7f5;
+  background:#ececea;
+  text-align:left;
+  text-transform:uppercase;
+  word-break:break-word;
+  hyphens:none;
+  overflow:hidden;
 }
 .card .thumb img{
   width:100%;height:100%;object-fit:cover;display:block;
@@ -559,9 +590,22 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 .detail-img .ph{
   width:min(80vw,calc(100vh - 220px));
   aspect-ratio:1;
-  display:grid;place-items:center;
-  font-size:clamp(60px,11vw,130px);font-weight:800;
-  color:var(--ink);line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:8%;
+  box-sizing:border-box;
+  font-size:clamp(40px,9vw,120px);
+  font-weight:900;
+  letter-spacing:-.03em;
+  line-height:.9;
+  color:#f7f7f5;
+  background:#ececea;
+  text-align:left;
+  text-transform:uppercase;
+  word-break:break-word;
+  hyphens:none;
+  overflow:hidden;
   animation:imgIn .85s cubic-bezier(.2,.8,.2,1) both;
 }
 .detail-img .hint{
@@ -678,9 +722,22 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 .lightbox .lb-inner .ph{
   width:min(88vw,88vh);
   aspect-ratio:1;
-  display:grid;place-items:center;
-  font-size:clamp(80px,18vw,200px);font-weight:800;
-  color:var(--ink);line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:7%;
+  box-sizing:border-box;
+  font-size:clamp(48px,11vw,160px);
+  font-weight:900;
+  letter-spacing:-.03em;
+  line-height:.9;
+  color:#f7f7f5;
+  background:#ececea;
+  text-align:left;
+  text-transform:uppercase;
+  word-break:break-word;
+  hyphens:none;
+  overflow:hidden;
 }
 
 /* ============================================================
@@ -764,7 +821,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   /* ----- 移动端右上角三个按钮（只在 index / detail 显示） ----- */
   .mobile-nav{
     position:fixed;
-    top:0;right:20px;
+    top:0;right:3px;
     z-index:600;
     height:46px;
     background:var(--surface);
@@ -1022,6 +1079,16 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .card-date{margin-top:10px;font-size:10px}
 }
 
+/*  深色模式：占位符低对比覆盖 */
+@media (prefers-color-scheme: dark){
+  .card .thumb .ph,
+  .detail-img .ph,
+  .lightbox .lb-inner .ph{
+    background:#1f1f1f;
+    color:#262626;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1070,7 +1137,11 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
     </div>
 
     <div class="nav-foot">
-      <span class="zh">2020 — 2026</span>
+      <span class="year-block">
+        <span class="zh">2020</span>
+        <span class="dash-line"></span>
+        <span class="zh">2026</span>
+      </span>
     </div>
 
   </div>
@@ -1970,7 +2041,8 @@ function thumbInnerHTML(w){
   if (w.thumb && !isHidden(w.id)){
     return `<img src="${w.thumb}" alt="${w.title}" loading="lazy" data-ph="${ph}">`;
   }
-  return `<span class="ph">${ph}</span>`;
+  const label = (w.charEn || w.char || '?').toUpperCase();
+  return `<span class="ph">${label}</span>`;
 }
 
 /* 给容器内的 img 绑定 error 回退 */
@@ -1991,7 +2063,7 @@ function makeCard(w){
   card.className = 'card';
 
   card.innerHTML = `
-    <div class="thumb" style="background:linear-gradient(145deg,${w.c1},${w.c2})">
+    <div class="thumb" style="background:${w.c1}">
       ${thumbInnerHTML(w)}
     </div>
     <div class="card-meta">
@@ -2049,10 +2121,11 @@ function renderDetail(){
     : '<span class="no-source">暂无原作地址 / No Source</span>';
 
   /* 大图：先预加载图片，加载完成后再一次性渲染图片 + hint，避免布局跳变 */
-  const box = document.getElementById('detailImg');
+   const box = document.getElementById('detailImg');
   const bigSrc = isHidden(w.id) ? '' : (w.full || w.thumb);
   const phChar = (w.char || '?').slice(0,1);
-  box.style.background = `linear-gradient(145deg,${w.c1},${w.c2})`;
+  const phLabel = (w.charEn || w.char || '?').toUpperCase();
+  box.style.background = w.c1;
   box.innerHTML = '';
   box.onclick = (e) => {
     e.stopPropagation();
@@ -2062,7 +2135,7 @@ function renderDetail(){
   const buildInner = (useImg) => {
     const bigInner = useImg
       ? `<img src="${bigSrc}" alt="${w.title}" data-ph="${phChar}">`
-      : `<span class="ph">${phChar}</span>`;
+      : `<span class="ph">${phLabel}</span>`;
 
     box.innerHTML = `
       ${bigInner}
@@ -2097,13 +2170,14 @@ function openFull(w){
   const lb = document.getElementById('lightbox');
   const src = isHidden(w.id) ? '' : (w.full || w.thumb);
 
+  const phLabel = (w.charEn || w.char || '?').toUpperCase();
   const inner = src
     ? `<img src="${src}" alt="${w.title}" data-ph="${(w.char || '?').slice(0,1)}">`
-    : `<span class="ph">${(w.char || '?').slice(0,1)}</span>`;
+    : `<span class="ph">${phLabel}</span>`;
 
   const bg = src
     ? 'background:#111'
-    : `background:linear-gradient(145deg,${w.c1},${w.c2})`;
+    : `background:${w.c1}`;
 
   lb.innerHTML = `<div class="lb-inner" style="${bg}">${inner}</div>`;
   bindImgFallback(lb);
