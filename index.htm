@@ -1079,13 +1079,41 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .card-date{margin-top:10px;font-size:10px}
 }
 
-/*  深色模式：占位符低对比覆盖 */
-@media (prefers-color-scheme: dark){
-  .card .thumb .ph,
-  .detail-img .ph,
-  .lightbox .lb-inner .ph{
-    background:#1f1f1f;
-    color:#262626;
+
+/* ============================================================
+   自定义光标：红圆环（仅桌面端，全站强制统一）
+   ============================================================ */
+@media (hover:hover) and (pointer:fine){
+  *,
+  *::before,
+  *::after,
+  html,
+  body,
+  a, button, [role="button"],
+  .card, .detail-img, .detail-stage, .lightbox,
+  .social-link, .cat-card, .subtab, .sort-wrap button,
+  .cat-menu a, .detail-links a, .m-subitem, .m-subtrigger,
+  .mobile-cat-drop a{
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><circle cx='6' cy='6' r='4.5' fill='white' stroke='%23E63329' stroke-width='1.4'/></svg>") 6 6, auto !important;
+  }
+
+  input, textarea{
+    cursor: text !important;
+  }
+}
+
+@media (hover:hover) and (pointer:fine) and (prefers-color-scheme: dark){
+  *,
+  *::before,
+  *::after,
+  html,
+  body,
+  a, button, [role="button"],
+  .card, .detail-img, .detail-stage, .lightbox,
+  .social-link, .cat-card, .subtab, .sort-wrap button,
+  .cat-menu a, .detail-links a, .m-subitem, .m-subtrigger,
+  .mobile-cat-drop a{
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><circle cx='6' cy='6' r='4.5' fill='white' stroke='%23ff5245' stroke-width='1.4'/></svg>") 6 6, auto !important;
   }
 }
 
