@@ -18,6 +18,7 @@
   --line-strong:#111111;
   --hover:#e8e8e4;
   --nav-w:220px;
+  --swiss:#E63329;     
 }
 *{box-sizing:border-box;margin:0;padding:0;border-radius:0}
 html{scroll-behavior:smooth}
@@ -131,7 +132,7 @@ body{
   font-size:10px;letter-spacing:.26em;text-transform:uppercase;
   color:var(--ink-3);font-weight:500;
 }
-.home-bar .num{color:var(--ink);font-weight:700;letter-spacing:.14em}
+.home-bar .num{color:var(--swiss);font-weight:700;letter-spacing:.14em}
 .home-bar .sep{flex:1}
 
 .home-hero{
@@ -152,13 +153,11 @@ body{
 .home-socials{
   display:flex;flex-wrap:wrap;
   border-top:1px solid var(--line-strong);
-  border-left:1px solid var(--line);
   margin-bottom:56px;width:100%;
 }
 .social-link{
-  flex:1 1 0;min-width:0;padding:22px 18px;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+  flex:1 1 0;min-width:0;
+  padding:22px 0;
   color:var(--ink);text-decoration:none;
   transition:background .22s ease;display:block;
 }
@@ -168,15 +167,13 @@ body{
 
 .home-cats{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
-  width:100%;border-top:1px solid var(--line-strong);
-  border-left:1px solid var(--line);
+  width:100%;
+  border-top:1px solid var(--line-strong);
 }
 .cat-card{
   aspect-ratio:1;border:none;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
   background:transparent;font-family:inherit;color:var(--ink);
-  cursor:pointer;padding:32px 30px;
+  cursor:pointer;padding:32px 0;
   display:flex;flex-direction:column;
   justify-content:space-between;align-items:flex-start;
   text-align:left;transition:background .25s ease;overflow:hidden;
@@ -216,7 +213,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   font-size:10px;letter-spacing:.26em;text-transform:uppercase;
   color:var(--ink-3);font-weight:500;
 }
-.head-row .num{color:var(--ink);font-weight:700;letter-spacing:.14em}
+.head-row .num{color:var(--swiss);font-weight:700;letter-spacing:.14em}
 
 .page-title{margin-top:44px}
 .page-title .zh{font-size:clamp(1.7rem,3.6vw,2.7rem);font-weight:800;letter-spacing:.01em;line-height:1.15}
@@ -272,7 +269,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 .sort-wrap{position:relative;display:flex;align-items:stretch}
 .sort-slider{
   position:absolute;top:0;left:0;height:100%;
-  background:var(--ink);
+  background:var(--swiss);
   transition:transform .48s cubic-bezier(.4,0,.2,1),
              width .48s cubic-bezier(.4,0,.2,1),
              opacity .25s ease;
@@ -403,12 +400,16 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   margin-top:38px;
 }
 .detail-links a{
-  flex:1;padding:22px 22px;
-  border:1px solid var(--line);border-right:none;
-  background:var(--surface);color:var(--ink);
-  text-decoration:none;transition:background .22s ease;display:block;
+  flex:1;
+  padding:22px 0;
+  border:none;
+  border-top:1px solid var(--line-strong);
+  background:var(--surface);
+  color:var(--ink);
+  text-decoration:none;
+  transition:background .22s ease;
+  display:block;
 }
-.detail-links a:last-child{border-right:1px solid var(--line)}
 .detail-links a:hover{background:var(--hover)}
 .detail-links a .zh{font-size:13px;font-weight:700;letter-spacing:.06em}
 .detail-links a .en{font-size:8.5px;letter-spacing:.18em;margin-top:8px}
@@ -589,7 +590,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .home-cats{grid-template-columns:1fr}
   .cat-card{aspect-ratio:auto;padding:26px 24px;gap:22px}
   .home-socials{border-left:none}
-  .social-link{flex:1 1 46%;min-width:0;border-left:1px solid var(--line)}
+  .social-link{flex:1 1 46%;min-width:0}
   .toolbar{width:100%}
   .sort-wrap{flex:1}
   .sort-wrap button{flex:1;padding:11px 10px 12px}
