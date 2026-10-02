@@ -51,7 +51,7 @@ body{
    ============================================================ */
 .sidenav{
   position:fixed;top:0;left:0;bottom:0;width:var(--nav-w);
-  z-index:500;pointer-events:none;visibility:hidden;
+  z-index:900;pointer-events:none;visibility:hidden;
 }
 .sidenav.show{pointer-events:auto;visibility:visible}
 .nav-bg{
@@ -699,6 +699,20 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 
   /* 移动端画师名加粗 */
   #artistId .zh{font-weight:900}
+
+  /* 移动端邮箱：降低层级 + 拉开上下间距 */
+  .hero-email{
+    margin-top:28px;
+  }
+  .hero-email .zh{
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.06em;
+    color:var(--ink-3);
+  }
+  .home-socials{
+    margin-top:32px;
+  }
 
   /* ----- 移动端右上角三个按钮（只在 index / detail 显示） ----- */
   .mobile-nav{
