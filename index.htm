@@ -53,8 +53,8 @@ body{
 }
 .sidenav.show{pointer-events:auto;visibility:visible}
 .nav-bg{
-  position:absolute;inset:0;background:var(--surface);
-  border-right:1px solid var(--line-strong);
+  position:absolute;inset:0;background:var(--bg);
+  border-right:none;
   transform:scaleY(0);transform-origin:top center;
 }
 .sidenav.show .nav-bg{animation:bgSweepY .78s cubic-bezier(.65,0,.35,1) forwards}
@@ -66,50 +66,88 @@ body{
   padding-top:34px;opacity:0;
   transition:opacity .4s ease .45s;
 }
+.nav-inner::before{
+  content:'';
+  position:absolute;
+  left:56px;
+  top:56px;
+  bottom:56px;
+  width:1px;
+  background:#d8d8d4;
+  pointer-events:none;
+}
 .sidenav.show .nav-inner{opacity:1}
 
 .nav-item{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:26px 12px;border:none;border-bottom:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  text-align:left;  padding:26px 24px 26px 96px;
+  border:none;
   background:transparent;font-family:inherit;color:var(--ink);
-  cursor:pointer;transition:background .22s ease;width:100%;
+  cursor:pointer;width:100%;
 }
-.nav-item:hover{background:var(--hover)}
-.nav-item .nav-zh{font-size:13px;font-weight:700;letter-spacing:.14em;line-height:1}
+.nav-item .nav-zh{
+  font-size:13px;font-weight:700;letter-spacing:.14em;line-height:1;
+  transition:color .22s ease;
+}
 .nav-item .nav-en{
   font-size:8.5px;font-weight:400;letter-spacing:.22em;
   text-transform:uppercase;color:var(--ink-3);
-  margin-top:8px;line-height:1;transition:color .22s ease;
+  margin-top:8px;line-height:1;
 }
-.nav-item:hover .nav-en{color:var(--ink-2)}
+.nav-item:hover .nav-zh{color:var(--swiss)}
 
 .nav-group{position:relative}
 .cat-menu{
-  max-height:0;overflow:hidden;background:#fafaf8;
-  border-bottom:1px solid var(--line);
+  max-height:0;
+  overflow:hidden;
+  background:transparent;
+  border-bottom:none;
+  position:relative;
   transition:max-height .48s cubic-bezier(.4,0,.2,1);
+}
+.cat-menu::before{
+  content:'';
+  position:absolute;
+  left:96px;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:#e2e2de;
+  pointer-events:none;
 }
 .nav-group:hover .cat-menu{max-height:520px}
 .cat-menu a{
-  display:block;padding:16px 14px 16px 26px;
-  border-bottom:1px solid var(--line);
-  color:var(--ink);text-decoration:none;cursor:pointer;
-  transition:background .2s ease;
+  display:block;
+  padding:16px 14px 16px 118px;
+  border-bottom:none;
+  color:var(--ink);
+  text-decoration:none;
+  cursor:pointer;
+  transition:color .22s ease;
+  background:transparent;
 }
-.cat-menu a:last-child{border-bottom:none}
-.cat-menu a:hover{background:var(--hover)}
-.cat-menu a .zh{font-size:11px;font-weight:600;letter-spacing:.02em;line-height:1.3}
-.cat-menu a .en{font-size:7px;letter-spacing:.13em;margin-top:5px;color:var(--ink-3);line-height:1.3}
+.cat-menu a .zh{
+  font-size:11px;font-weight:600;letter-spacing:.02em;line-height:1.3;
+  transition:color .22s ease;
+}
+.cat-menu a .en{
+  font-size:7px;letter-spacing:.13em;margin-top:5px;color:var(--ink-3);line-height:1.3;
+}
+.cat-menu a:hover .zh{color:var(--swiss)}
 
 .nav-foot{
-  margin-top:auto;padding:24px 20px;
-  border-top:1px solid var(--line);text-align:center;
+  margin-top:auto;
+  padding:24px 24px 56px 96px;
+  border-top:none;
+  text-align:left;
 }
 .nav-foot .zh{
-  font-size:9px;font-weight:500;letter-spacing:.24em;
-  color:var(--ink-3);text-transform:uppercase;
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:.24em;
+  color:var(--ink-3);
+  text-transform:uppercase;
 }
-
 /* ============================================================
    视图
    ============================================================ */
@@ -132,12 +170,19 @@ body{
   font-size:10px;letter-spacing:.26em;text-transform:uppercase;
   color:var(--ink-3);font-weight:500;
 }
-.home-bar .num{color:var(--swiss);font-weight:700;letter-spacing:.14em}
+.home-bar .num{
+  display:inline-block;
+  width:10px;height:10px;
+  background:var(--swiss);
+  font-size:0;
+  line-height:1;
+  flex-shrink:0;
+}
 .home-bar .sep{flex:1}
 
 .home-hero{
   flex:1;display:flex;flex-direction:column;
-  justify-content:center;padding:72px 0 64px;
+  justify-content:center;padding:64px 0 48px;
 }
 #artistId{transform-origin:left center;will-change:transform,opacity,filter}
 #artistId .zh{
@@ -146,9 +191,23 @@ body{
   letter-spacing:-.01em;
   line-height:.98;
 }
-.hero-tag{margin-top:34px}
+.hero-tag{margin-top:60px}
 .hero-tag .zh{font-size:14px;font-weight:600;color:var(--ink-2);letter-spacing:.08em}
 .hero-tag .en{font-size:9px;letter-spacing:.26em;margin-top:8px}
+
+.hero-email{
+  display:block;
+  margin-top:24px;
+  text-decoration:none;
+  color:var(--ink-2);
+  transition:color .22s ease;
+}
+.hero-email .zh{
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:.04em;
+}
+.hero-email:hover .zh{color:var(--swiss)}
 
 .home-socials{
   display:flex;flex-wrap:wrap;
@@ -195,10 +254,12 @@ body.intro #artistId{animation:idSeq 2.8s cubic-bezier(.22,.9,.24,1) .15s both}
   100%{opacity:1;transform:scale(1)}
 }
 body.intro .hero-tag{animation:fadeUp .8s ease 2.7s both}
+body.intro .hero-email{animation:fadeUp .8s ease 2.85s both}
 body.intro .home-socials{animation:fadeUp .8s ease 2.95s both}
 body.intro .home-cats{animation:fadeUp .8s ease 3.25s both}
 /* 从 index/detail 返回主页：跳过 ID 动画，只让栏目淡入 */
 body.intro-soft .hero-tag{animation:fadeUp .7s ease .1s both}
+body.intro-soft .hero-email{animation:fadeUp .7s ease .18s both}
 body.intro-soft .home-socials{animation:fadeUp .7s ease .25s both}
 body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -213,7 +274,14 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   font-size:10px;letter-spacing:.26em;text-transform:uppercase;
   color:var(--ink-3);font-weight:500;
 }
-.head-row .num{color:var(--swiss);font-weight:700;letter-spacing:.14em}
+.head-row .num{
+  display:inline-block;
+  width:10px;height:10px;
+  background:var(--swiss);
+  font-size:0;
+  line-height:1;
+  flex-shrink:0;
+}
 
 .page-title{margin-top:44px}
 .page-title .zh{font-size:clamp(1.7rem,3.6vw,2.7rem);font-weight:800;letter-spacing:.01em;line-height:1.15}
@@ -578,6 +646,10 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 /* ============================================================
    响应式
    ============================================================ */
+/* 桌面端：拉开社媒栏与分类栏的距离 */
+@media(min-width:821px){
+  .home-socials{margin-bottom:112px}
+}
 @media(max-width:1100px){:root{--nav-w:180px}}
 @media(max-width:820px){:root{--nav-w:150px}}
 @media(max-width:640px){
@@ -918,6 +990,9 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
         <span class="zh">插画 / 同人创作者</span>
         <span class="en">Illustrator &amp; Doujin Artist</span>
       </p>
+      <a class="hero-email" href="mailto:euco2020@163.com">
+        <span class="zh">euco2020@163.com</span>
+      </a>
     </div>
 
     <div class="home-socials">
@@ -932,9 +1007,6 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
       </a>
       <a class="social-link" href="https://www.pixiv.net/users/22615456" target="_blank" rel="noopener">
         <span class="zh">Pixiv</span><span class="en">Pixiv</span>
-      </a>
-      <a class="social-link" href="mailto:euco2020@163.com">
-        <span class="zh">邮箱</span><span class="en">euco2020@163.com</span>
       </a>
     </div>
 
