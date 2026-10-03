@@ -186,31 +186,11 @@ body{
 
 .nav-foot{
   margin-top:auto;
-  padding:24px 24px 56px calc(var(--nav-line-x) + var(--nav-gap));
+  padding:0 24px 56px calc(var(--nav-line-x) + var(--nav-gap));
   border-top:none;
   text-align:left;
 }
-.nav-foot .zh{
-  font-size:9px;
-  font-weight:500;
-  letter-spacing:.24em;
-  color:var(--ink-3);
-  text-transform:uppercase;
-}
-.nav-foot .year-block{
-  display:inline-flex;
-  flex-direction:column;
-  align-items:flex-start;
-  line-height:1;
-  gap:12px;
-}
-.nav-foot .year-block .dash-line{
-  align-self:center;
-  display:block;
-  width:1px;
-  height:10px;
-  background:var(--ink-3);
-}
+
 
 /* ============================================================
    视图
@@ -1216,18 +1196,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   color: var(--swiss);
 }
 
-/* 侧边栏底部：按钮和年份宽度中心对齐 */
-.nav-foot-inner{
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-.nav-foot-inner .theme-wrap{
-  align-self: stretch;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
+
 
 
 
@@ -1275,21 +1244,12 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
     </div>
 
     <div class="nav-foot">
-      <div class="nav-foot-inner">
-        <div class="theme-wrap">
-          <button class="theme-btn" data-theme-toggle type="button" aria-label="切换主题">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle class="icon-fill" cx="12" cy="12" r="8" fill="currentColor"/>
-              <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </button>
-        </div>
-        <span class="year-block">
-          <span class="zh">2020</span>
-          <span class="dash-line"></span>
-          <span class="zh">2026</span>
-        </span>
-      </div>
+      <button class="theme-btn" data-theme-toggle type="button" aria-label="切换主题">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle class="icon-fill" cx="12" cy="12" r="8" fill="currentColor"/>
+          <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
     </div>
 
   </div>
