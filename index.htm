@@ -25,16 +25,19 @@
 
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#0e0e0e;
-    --surface:#1a1a1a;
-    --ink:#f0f0f0;
-    --ink-2:#b8b8b8;
-    --ink-3:#707070;
-    --line:#262626;
-    --line-strong:#e8e8e8;
-    --hover:#1f1f1f;
+    --bg:#1b1b1d;
+    --surface:#242427;
+    --ink:#ececec;
+    --ink-2:#b4b4b6;
+    --ink-3:#7c7c80;
+    --line:#333336;
+    --line-strong:#dedede;
+    --hover:#2a2a2e;
     --swiss:#ff5245;
   }
+}
+@media (prefers-color-scheme: dark){
+  .lightbox{background:#18181a}
 }
 
 *{box-sizing:border-box;margin:0;padding:0;border-radius:0}
@@ -724,7 +727,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
    全屏
    ============================================================ */
 .lightbox{
-  position:fixed;inset:0;z-index:1000;background:#000;
+  position:fixed;inset:0;z-index:1000;background:#111;
   display:none;place-items:center;cursor:zoom-out;padding:40px;
 }
 .lightbox.open{display:grid}
@@ -1142,6 +1145,36 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .cat-menu a, .detail-links a, .m-subitem, .m-subtrigger,
   .mobile-cat-drop a{
     cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><circle cx='6' cy='6' r='4.5' fill='white' stroke='%23ff5245' stroke-width='1.4'/></svg>") 6 6, auto !important;
+  }
+}
+
+/* 深色模式：占位符低对比覆盖 */
+@media (prefers-color-scheme: dark){
+  .card .thumb .ph,
+  .detail-img .ph,
+  .lightbox .lb-inner .ph{
+    background:#242427;
+    color:#2c2c30;
+  }
+}
+
+/* 深色模式：红色滑块上的文字不要纯白，略微柔和 */
+@media (prefers-color-scheme: dark){
+  .subtab.active .zh,
+  .sort-wrap button.active .zh{
+    color:#ececec;
+  }
+}
+
+/* 深色模式：缩略图轻微变暗（详情/全屏保持原亮度）*/
+@media (prefers-color-scheme: dark){
+  .card .thumb img{
+    filter: brightness(0.88);
+  }
+
+  /* 悬停时恢复亮度，暗示可点 */
+  .card:hover .thumb img{
+    filter: brightness(1);
   }
 }
 
