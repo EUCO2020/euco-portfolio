@@ -16,9 +16,7 @@
 })();
 </script>
 <style>
-/* ============================================================
-   基础
-   ============================================================ */
+/* 基础 */
 :root{
   --bg:#f3f3f1;
   --surface:#ffffff;
@@ -68,9 +66,7 @@ body{
 .zh{display:block;font-weight:700;letter-spacing:.02em;line-height:1.25}
 .en{display:block;font-weight:400;font-size:.72em;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-top:.4em;line-height:1.35}
 
-/* ============================================================
-   页面渐变过渡
-   ============================================================ */
+/* 页面渐变过渡 */
 #fadeOverlay{
   position:fixed;inset:0;background:var(--bg);z-index:800;
   opacity:1;pointer-events:auto;
@@ -78,9 +74,7 @@ body{
 }
 #fadeOverlay:not(.on){opacity:0;pointer-events:none}
 
-/* ============================================================
-   左侧竖列导航
-   ============================================================ */
+/* 左侧竖列导航 */
 .sidenav{
   position:fixed;top:0;left:0;bottom:0;width:var(--nav-w);
   z-index:900;pointer-events:none;visibility:hidden;
@@ -192,16 +186,12 @@ body{
 }
 
 
-/* ============================================================
-   视图
-   ============================================================ */
+/* 视图 */
 .view{display:none}
 .view.active{display:block}
 #view-index,#view-detail{margin-left:var(--nav-w);min-height:100vh}
 
-/* ============================================================
-   首页
-   ============================================================ */
+/* 首页 */
 #view-home.active{display:block;min-height:100vh}
 .home-frame{
   max-width:1200px;margin:0 auto;
@@ -308,9 +298,7 @@ body.intro-soft .home-socials{animation:fadeUp .7s ease .25s both}
 body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-/* ============================================================
-   Index 页
-   ============================================================ */
+/* Index 页 */
 #view-index{padding:56px 64px 96px}
 .head-row{
   display:flex;align-items:center;gap:18px;
@@ -488,9 +476,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   padding:100px 0;font-size:12px;letter-spacing:.24em;text-transform:uppercase;
 }
 
-/* ============================================================
-   详情页
-   ============================================================ */
+/* 详情页 */
 #view-detail{padding:0;min-height:100vh}
 #view-detail.active{display:flex}
 
@@ -710,9 +696,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .detail-img .hint{display:none}
 }
 
-/* ============================================================
-   全屏
-   ============================================================ */
+/* 全屏 */
 .lightbox{
   position:fixed;inset:0;z-index:1000;background:#111;
   display:none;place-items:center;cursor:zoom-out;padding:40px;
@@ -758,9 +742,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   overflow:hidden;
 }
 
-/* ============================================================
-   响应式
-   ============================================================ */
+/* 响应式 */
 /* 桌面端：社媒栏每个文字上方加红色小方块，方块中心骑在横线上 */
 @media(min-width:821px){
   .home-socials{margin-bottom:112px}
@@ -800,9 +782,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .subtab .zh{font-size:11px}
 }
 
-/* ============================================================
-   移动端专用样式（<= 820px）
-   ============================================================ */
+/* 移动端专用样式（<= 820px） */
 .mobile-nav,
 .mobile-cat-drop,
 .m-subtabs{display:none}
@@ -1098,9 +1078,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 }
 
 
-/* ============================================================
-   自定义光标：红圆环（仅桌面端，全站强制统一）
-   ============================================================ */
+/* 自定义光标：红圆环（仅桌面端，全站强制统一） */
 @media (hover:hover) and (pointer:fine){
   *,
   *::before,
@@ -1128,9 +1106,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   }
 }
 
-/* ============================================================
-   深色模式：其他覆盖
-   ============================================================ */
+/* 深色模式：其他覆盖 */
 :root[data-theme="dark"] .card .thumb .ph,
 :root[data-theme="dark"] .detail-img .ph,
 :root[data-theme="dark"] .lightbox .lb-inner .ph{
@@ -1151,9 +1127,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 }
 
 
-/* ============================================================
-   主题切换按钮：空心圆 / 实心圆
-   ============================================================ */
+/* 主题切换按钮：空心圆 / 实心圆 */
 .theme-btn{
   display: inline-grid;
   place-items: center;
@@ -1436,9 +1410,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 </div>
 
 <script>
-/* ============================================================
-   1. 数据
-   ============================================================ */
+/* 1. 数据 */
 const CATS = [
   {
     key:'idol', zh:'偶像类同人绘画', en:'Idol Doujin Illustration', num:'01',
@@ -1594,24 +1566,22 @@ const WORKS = [
   { id:'w125', cat:'game', sub:'other', title:'Made My Night', titleEn:'Made My Night', char:'安燃', charEn:'Anran', date:'2026-09-26', thumb:'images/w125-thumb.jpg', full:'images/w125-full.jpg', c1:'#e6e2e8', c2:'#ccc6d0', pixiv:'', weibo:'' }
 ];
 
-/* ============================================================
-   隐藏列表：这些 id 的作品不显示图片，只用占位符
-   ============================================================ */
+/* 隐藏列表：这些 id 的作品不显示图片，只用占位符 */
 const HIDDEN_IDS = ['w006','w008','w030','w047','w048','w049','w050','w052','w074','w077','w078'];
 
+/* 判断作品是否只显示占位符 */
 function isHidden(id){
   return HIDDEN_IDS.indexOf(id) !== -1;
 }
 
-/* ============================================================
-   2. 状态
-   ============================================================ */
+/* 2. 状态 */
 const state = {
   view:'home', cat:null, sub:'all',
   sort:'date', sortDir:'desc', search:'', workId:null
 };
 const navStack = [];
 
+/* 记录当前状态，供返回时恢复 */
 function pushNav(){
   navStack.push({
     view:state.view, cat:state.cat, sub:state.sub,
@@ -1622,14 +1592,13 @@ function pushNav(){
   if (navStack.length > 60) navStack.shift();
 }
 
-/* ============================================================
-   3. 页面渐变过渡
-   ============================================================ */
+/* 3. 页面渐变过渡 */
 const overlay = document.getElementById('fadeOverlay');
 let transitioning = false;
 let transitionTimer1 = null;
 let transitionTimer2 = null;
 
+/* 页面渐变过渡：淡入 → 执行切换回调 → 淡出 */
 function transitionTo(fn, duration=400){
   /* 允许打断：取消上一次过渡的定时器 */
   if (transitionTimer1){ clearTimeout(transitionTimer1); transitionTimer1 = null; }
@@ -1655,9 +1624,9 @@ function transitionTo(fn, duration=400){
   }, duration);
 }
 
-/* ============================================================
-   4. 渲染调度
-   ============================================================ */
+/* 4. 渲染调度 */
+
+/* 移动左侧分类的红色方块到当前分类位置 */
 function moveCatSlider(key){
   const catSlider = document.getElementById('catSlider');
   if (!catSlider) return;
@@ -1687,6 +1656,7 @@ function moveCatSlider(key){
   }
 }
 
+/* 统一渲染入口：按 state.view 切换视图并同步导航 */
 function render(restoreY){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
 
@@ -1737,6 +1707,7 @@ function render(restoreY){
   });
 }
 
+/* 同步桌面端侧边栏与移动端导航的显示状态 */
 function updateNav(){
   const nav = document.getElementById('sidenav');
   const mobileNav = document.getElementById('mobileNav');
@@ -1752,9 +1723,9 @@ function updateNav(){
   }
 }
 
-/* ============================================================
-   5. 首页分类
-   ============================================================ */
+/* 5. 首页分类 */
+
+/* 渲染首页分类卡片（全部 + 三个大类） */
 function renderCats(){
   const box = document.getElementById('cats');
   box.innerHTML = '';
@@ -1787,9 +1758,9 @@ function renderCats(){
     box.appendChild(btn);
   });
 }
-/* ============================================================
-   6. 导航行为
-   ============================================================ */
+/* 6. 导航行为 */
+
+/* 返回主页 */
 function goHome(){
   transitionTo(()=>{
     navStack.length = 0;
@@ -1811,6 +1782,7 @@ function goHome(){
   });
 }
 
+/* 打开某个分类的 Index 页 */
 function openCat(key){
   /* 立即滑动左侧分类方块，和右侧切换同时进行 */
   moveCatSlider(key);
@@ -1830,6 +1802,7 @@ function openCat(key){
   });
 }
 
+/* 打开作品详情页 */
 function openDetail(id){
   transitionTo(()=>{
     pushNav();
@@ -1839,6 +1812,7 @@ function openDetail(id){
   });
 }
 
+/* 返回上一视图（优先从导航栈恢复） */
 function goBack(){
   transitionTo(()=>{
     const prev = navStack.pop();
@@ -1875,13 +1849,12 @@ function goBack(){
   });
 }
 
-/* ============================================================
-   7. Index 渲染
-   ============================================================ */
+/* 7. Index 渲染 */
 let renderedSubCat = null;
 let subSliderInit = false;
 let sortSliderInit = false;
 
+/* 渲染 Index 页：标题、子分类、排序、网格 */
 function renderIndex(){
   const isAll = (state.cat === 'all');
   const cat = isAll ? null : CATS.find(c => c.key === state.cat);
@@ -2027,6 +2000,7 @@ function updateSortButtons(){
   });
 }
 
+/* 切换子分类并刷新标签栏 / 下拉 / 网格 */
 function setSub(key){
   if (state.sub === key) return;
   state.sub = key;
@@ -2058,6 +2032,7 @@ function setSub(key){
   renderGrid();
 }
 
+/* 把子分类红色滑块移到当前项 */
 function updateSubSlider(){
   const wrap = document.getElementById('subTabs');
   const slider = document.getElementById('subSlider');
@@ -2085,6 +2060,7 @@ function updateSubSlider(){
   }
 }
 
+/* 把排序红色滑块移到当前项 */
 function updateSortSlider(){
   const wrap = document.getElementById('sortWrap');
   const slider = document.getElementById('sortSlider');
@@ -2112,6 +2088,7 @@ function updateSortSlider(){
   }
 }
 
+/* 按分类 / 子分类 / 搜索 / 排序过滤后渲染作品网格 */
 function renderGrid(){
   let list;
 
@@ -2178,6 +2155,7 @@ function bindImgFallback(container){
   });
 }
 
+/* 创建单个作品卡片 */
 function makeCard(w){
   const card = document.createElement('article');
   card.className = 'card';
@@ -2204,9 +2182,9 @@ function makeCard(w){
   return card;
 }
 
-/* ============================================================
-   8. 详情
-   ============================================================ */
+/* 8. 详情 */
+
+/* 渲染详情页信息与大图 */
 function renderDetail(){
   const w = WORKS.find(x => x.id === state.workId);
   if (!w) return;
@@ -2282,9 +2260,9 @@ function renderDetail(){
   panel.classList.add('expand');
 }
 
-/* ============================================================
-   9. 全屏
-   ============================================================ */
+/* 9. 全屏 */
+
+/* 打开全屏查看大图 */
 function openFull(w){
   const lb = document.getElementById('lightbox');
   const src = isHidden(w.id) ? '' : (w.full || w.thumb);
@@ -2303,6 +2281,7 @@ function openFull(w){
   lb.classList.add('open');
 }
 
+/* 点击全屏区域关闭 */
 document.getElementById('lightbox').addEventListener('click', function(){
   this.classList.remove('open');
   this.innerHTML = '';
@@ -2318,9 +2297,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ============================================================
-   10. 事件绑定 & 启动
-   ============================================================ */
+/* 10. 事件绑定 & 启动 */
 document.querySelectorAll('[data-action]').forEach(btn => {
   btn.addEventListener('click', () => {
     const a = btn.dataset.action;
@@ -2380,9 +2357,7 @@ window.addEventListener('load', ()=>{
   setTimeout(()=>{ overlay.classList.remove('on'); }, 120);
 });
 
-/* ============================================================
-   移动端事件绑定
-   ============================================================ */
+/* 移动端事件绑定 */
 (function bindMobileEvents(){
 
   /* 顶部三个按钮 */
@@ -2477,9 +2452,9 @@ window.addEventListener('load', ()=>{
   }
 })();
 
-/* ============================================================
-   主题切换
-   ============================================================ */
+/* 主题切换 */
+
+/* 根据当前主题更新按钮的无障碍文案 */
 function updateThemeButtons(){
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
