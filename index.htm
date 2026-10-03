@@ -70,7 +70,7 @@ body{
 #fadeOverlay{
   position:fixed;inset:0;background:var(--bg);z-index:800;
   opacity:1;pointer-events:auto;
-  transition:opacity .42s ease;
+  transition:opacity .24s ease;
 }
 #fadeOverlay:not(.on){opacity:0;pointer-events:none}
 
@@ -85,15 +85,18 @@ body{
   border-right:none;
   transform:scaleY(0);transform-origin:top center;
 }
-.sidenav.show .nav-bg{animation:bgSweepY .78s cubic-bezier(.65,0,.35,1) forwards}
+/* 背景：进入时从上到下展开，离开时从下到上收起 */
+.sidenav.show .nav-bg{animation:bgSweepY .64s cubic-bezier(.22,.9,.24,1) forwards}
+.sidenav.nav-leaving .nav-bg{animation:bgSweepYOut .5s cubic-bezier(.4,0,.7,1) forwards}
 @keyframes bgSweepY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes bgSweepYOut{from{transform:scaleY(1)}to{transform:scaleY(0)}}
 
 .nav-inner{
   position:relative;height:100%;
   display:flex;flex-direction:column;
-  padding-top:34px;opacity:0;
-  transition:opacity .4s ease .45s;
+  padding-top:34px;
 }
+/* 侧边栏竖线：进入时从上到下展开，离开时从下到上收起 */
 .nav-inner::before{
   content:'';
   position:absolute;
@@ -103,8 +106,28 @@ body{
   width:1px;
   background:var(--line);
   pointer-events:none;
+  transform:scaleY(0);
+  transform-origin:top center;
 }
-.sidenav.show .nav-inner{opacity:1}
+/* 侧边栏内容：进入时从上到下依次淡入，离开时从下到上依次淡出 */
+.nav-inner > *{opacity:0}
+
+.sidenav.show .nav-inner::before{animation:navLineIn .64s cubic-bezier(.22,.9,.24,1) both}
+.sidenav.show .nav-inner > *{animation:navItemIn .44s cubic-bezier(.22,.9,.24,1) both}
+.sidenav.show .nav-inner > *:nth-child(1){animation-delay:0s}
+.sidenav.show .nav-inner > *:nth-child(2){animation-delay:.07s}
+.sidenav.show .nav-inner > *:nth-child(3){animation-delay:.14s}
+
+.sidenav.nav-leaving .nav-inner::before{animation:navLineOut .5s cubic-bezier(.4,0,.7,1) both}
+.sidenav.nav-leaving .nav-inner > *{animation:navItemOut .34s ease both}
+.sidenav.nav-leaving .nav-inner > *:nth-child(1){animation-delay:.12s}
+.sidenav.nav-leaving .nav-inner > *:nth-child(2){animation-delay:.06s}
+.sidenav.nav-leaving .nav-inner > *:nth-child(3){animation-delay:0s}
+
+@keyframes navLineIn{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes navLineOut{from{transform:scaleY(1)}to{transform:scaleY(0)}}
+@keyframes navItemIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes navItemOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-8px)}}
 
 .nav-item{
   display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
@@ -1624,6 +1647,30 @@ function transitionTo(fn, duration=400){
   }, duration);
 }
 
+/* 3.1 侧边栏 进出动画（桌面端） */
+const NAV_LEAVE_MS = 480; /* 需 ≥ 侧边栏收起动画结束时间 */
+
+/* 是否处于桌面端布局 */
+function isDesktopNav(){
+  return window.matchMedia('(min-width:821px)').matches;
+}
+
+/* 是否需要播放“收起”动画：桌面端、侧边栏可见、且当前不在主页 */
+function shouldPlayLeave(){
+  const nav = document.getElementById('sidenav');
+  return isDesktopNav() && !!nav && nav.classList.contains('show') && state.view !== 'home';
+}
+
+/* 播放侧边栏收起（线从下到上 + 内容从下到上淡出）；索引页内容仍走原本的整页淡出 */
+function playLeaveAnimations(){
+  const nav = document.getElementById('sidenav');
+  if (nav){
+    nav.classList.remove('nav-leaving');
+    void nav.offsetWidth;
+    nav.classList.add('nav-leaving');
+  }
+}
+
 /* 4. 渲染调度 */
 
 /* 移动左侧分类的红色方块到当前分类位置 */
@@ -1715,9 +1762,11 @@ function updateNav(){
 
   if (state.view === 'home'){
     nav.classList.remove('show');
+    nav.classList.remove('nav-leaving');
     if (mobileNav) mobileNav.classList.remove('show');
     if (mobileCatDrop) mobileCatDrop.classList.remove('open');
   } else {
+    nav.classList.remove('nav-leaving');
     nav.classList.add('show');
     if (mobileNav) mobileNav.classList.add('show');
   }
@@ -1760,26 +1809,35 @@ function renderCats(){
 }
 /* 6. 导航行为 */
 
+/* 提交回主页：重置状态并让首页内容淡入 */
+function commitHome(){
+  navStack.length = 0;
+  state.view = 'home';
+  state.cat = null;
+  state.workId = null;
+
+  /* 移除首次加载动画类，避免 ID 缩小动画重新播放 */
+  document.body.classList.remove('intro');
+  document.body.classList.remove('intro-soft');
+  void document.body.offsetHeight;
+
+  render();
+
+  /* 下一帧触发栏目淡入 */
+  requestAnimationFrame(()=>{
+    document.body.classList.add('intro-soft');
+  });
+}
+
 /* 返回主页 */
 function goHome(){
-  transitionTo(()=>{
-    navStack.length = 0;
-    state.view = 'home';
-    state.cat = null;
-    state.workId = null;
-
-    /* 移除首次加载动画类，避免 ID 缩小动画重新播放 */
-    document.body.classList.remove('intro');
-    document.body.classList.remove('intro-soft');
-    void document.body.offsetHeight;
-
-    render();
-
-    /* 下一帧触发栏目淡入 */
-    requestAnimationFrame(()=>{
-      document.body.classList.add('intro-soft');
-    });
-  });
+  /* 桌面端：侧边栏收起与原本的整页淡出同时进行，随后切回主页 */
+  if (shouldPlayLeave()){
+    playLeaveAnimations();
+    transitionTo(commitHome, NAV_LEAVE_MS);
+    return;
+  }
+  transitionTo(commitHome);
 }
 
 /* 打开某个分类的 Index 页 */
@@ -1799,7 +1857,7 @@ function openCat(key){
     const input = document.getElementById('searchInput');
     if (input) input.value = '';
     render();
-  });
+  }, 240);
 }
 
 /* 打开作品详情页 */
@@ -1812,41 +1870,54 @@ function openDetail(id){
   });
 }
 
-/* 返回上一视图（优先从导航栈恢复） */
-function goBack(){
-  transitionTo(()=>{
-    const prev = navStack.pop();
-    if (prev){
-      const scrollY = prev.scrollY || 0;
-      Object.assign(state, prev);
-      const input = document.getElementById('searchInput');
-      if (input) input.value = state.search || '';
+/* 应用返回结果：恢复上一视图 */
+function applyBack(){
+  const prev = navStack.pop();
+  if (prev){
+    const scrollY = prev.scrollY || 0;
+    Object.assign(state, prev);
+    const input = document.getElementById('searchInput');
+    if (input) input.value = state.search || '';
 
-      if (state.view === 'home'){
-        /* 回到主页：跳过 ID 动画 */
-        document.body.classList.remove('intro');
-        document.body.classList.remove('intro-soft');
-        void document.body.offsetHeight;
-        render(scrollY);
-        requestAnimationFrame(()=>{
-          document.body.classList.add('intro-soft');
-        });
-      } else {
-        render(scrollY);
-      }
-    } else {
-      state.view = 'home';
-      state.cat = null;
-      state.workId = null;
+    if (state.view === 'home'){
+      /* 回到主页：跳过 ID 动画 */
       document.body.classList.remove('intro');
       document.body.classList.remove('intro-soft');
       void document.body.offsetHeight;
-      render();
+      render(scrollY);
       requestAnimationFrame(()=>{
         document.body.classList.add('intro-soft');
       });
+    } else {
+      render(scrollY);
     }
-  });
+  } else {
+    state.view = 'home';
+    state.cat = null;
+    state.workId = null;
+    document.body.classList.remove('intro');
+    document.body.classList.remove('intro-soft');
+    void document.body.offsetHeight;
+    render();
+    requestAnimationFrame(()=>{
+      document.body.classList.add('intro-soft');
+    });
+  }
+}
+
+/* 返回上一视图（优先从导航栈恢复） */
+function goBack(){
+  const prevPeek = navStack.length ? navStack[navStack.length - 1] : null;
+  const willGoHome = !prevPeek || prevPeek.view === 'home';
+
+  /* 桌面端回到主页：侧边栏收起与原本的整页淡出同时进行 */
+  if (willGoHome && shouldPlayLeave()){
+    playLeaveAnimations();
+    transitionTo(applyBack, NAV_LEAVE_MS);
+    return;
+  }
+
+  transitionTo(applyBack);
 }
 
 /* 7. Index 渲染 */
