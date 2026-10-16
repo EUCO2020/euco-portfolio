@@ -346,70 +346,67 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   position:relative;display:flex;flex-wrap:wrap;
   margin-top:38px;
   border-top:1px solid var(--line);
-  border-left:1px solid var(--line);
-  width:fit-content;
+  border-left:none;
+  width:100%;
 }
 .subtab-slider{
-  position:absolute;top:0;left:0;
-  height:100%;
+  position:absolute;top:-2px;left:0;
+  height:4px;
   background:var(--swiss);
   transition:transform .48s cubic-bezier(.4,0,.2,1),
              width .48s cubic-bezier(.4,0,.2,1),
              opacity .25s ease;
-  z-index:1;pointer-events:none;opacity:0;
+  z-index:3;pointer-events:none;opacity:0;
 }
 .subtab{
   position:relative;z-index:2;
-  padding:15px 26px;
-  border:none;border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+  padding:14px 36px 15px 0;
+  border:none;
   background:transparent;font-family:inherit;cursor:pointer;
   transition:background .22s ease;
-  text-align:left;min-width:120px;
+  display:flex;flex-direction:column;align-items:flex-start;
+  text-align:left;
 }
-.subtab .zh{font-size:12.5px;font-weight:700;letter-spacing:.03em;color:var(--ink);transition:color .35s ease}
+.subtab:last-child{padding-right:0}
+.subtab .zh{font-size:12.5px;font-weight:600;letter-spacing:.03em;color:var(--ink-3);transition:color .35s ease}
 .subtab .en{font-size:8px;letter-spacing:.15em;margin-top:6px;color:var(--ink-3);transition:color .35s ease}
-.subtab:hover:not(.active){background:var(--hover)}
-.subtab.active .zh{color:#fff}
-.subtab.active .en{color:rgba(255,255,255,.6)}
-/* 工具栏 */
+.subtab:hover:not(.active){background:transparent}
+.subtab:hover:not(.active) .zh{color:var(--ink)}
+.subtab.active .zh{color:var(--ink);font-weight:700}
+.subtab.active .en{color:var(--swiss)}
+/* .tool-label（「排序 / Sort」标签）已从 HTML 删除：排序按钮直接顶格到工具栏左边缘 */
 .toolbar{
   display:flex;align-items:stretch;
   margin-top:34px;
   border-top:1px solid var(--line);
-  border-left:1px solid var(--line);
-  width:fit-content;flex-wrap:wrap;
-}
-.tool-label{
-  padding:15px 24px;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-  font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;
-  color:var(--ink-3);font-weight:500;background:var(--surface);
-  display:flex;align-items:center;
+  border-left:none;
+  border-right:none;
+  border-bottom:none;
+  width:100%;padding:0;flex-wrap:wrap;
+  background:transparent;
 }
 .sort-wrap{position:relative;display:flex;align-items:stretch}
 .sort-slider{
-  position:absolute;top:0;left:0;height:100%;
+  position:absolute;top:-2px;left:0;height:4px;
   background:var(--swiss);
   transition:transform .48s cubic-bezier(.4,0,.2,1),
              width .48s cubic-bezier(.4,0,.2,1),
              opacity .25s ease;
-  z-index:1;pointer-events:none;opacity:0;
+  z-index:3;pointer-events:none;opacity:0;
 }
 .sort-wrap button{
   position:relative;z-index:2;
-  padding:12px 28px 13px;
-  border:none;border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+  padding:14px 56px 15px 0;
+  border:none;
   background:transparent;font-family:inherit;
   cursor:pointer;
   transition:background .22s ease;
   display:flex;flex-direction:column;align-items:flex-start;
   text-align:left;
 }
+.sort-wrap button:last-child{padding-right:0}
 .sort-wrap button .zh{
-  font-size:12px;font-weight:600;letter-spacing:.06em;
+  font-size:13px;font-weight:600;letter-spacing:.06em;
   line-height:1.2;color:var(--ink-3);
   transition:color .35s ease;
   white-space:nowrap;
@@ -421,27 +418,34 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   transition:color .35s ease;
   white-space:nowrap;
 }
-.sort-wrap button:hover:not(.active){background:var(--hover)}
+.sort-wrap button:hover:not(.active){background:transparent}
 .sort-wrap button:hover:not(.active) .zh{color:var(--ink)}
-.sort-wrap button.active .zh{color:#fff}
-.sort-wrap button.active .en{color:rgba(255,255,255,.55)}
+.sort-wrap button.active .zh{color:var(--ink);font-weight:700}
+.sort-wrap button.active .en{color:var(--swiss)}
 
 .search-wrap{
   display:flex;align-items:center;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-  background:var(--surface);padding:0 20px;
+  border:none;
+  background:transparent;padding:0 0 0 56px;
   min-width:260px;transition:background .22s ease;
 }
-.search-wrap:focus-within{background:var(--surface)}
-.search-wrap .s-icon{font-size:10px;color:var(--ink-3);letter-spacing:.1em;margin-right:12px;flex-shrink:0}
+.search-wrap:focus-within{background:transparent}
+.search-wrap .s-icon{
+  display:flex;align-items:center;
+  font-size:10px;color:var(--ink-3);letter-spacing:.1em;
+  margin-right:12px;flex-shrink:0;
+}
+.search-wrap .s-icon::before{
+  content:'';width:8px;height:8px;margin-right:10px;
+  background:var(--swiss);flex-shrink:0;
+}
 .search-wrap input{
   border:none;outline:none;background:transparent;
   font-family:inherit;font-size:12.5px;font-weight:500;
   color:var(--ink);letter-spacing:.04em;
   padding:16px 0;width:100%;
 }
-.search-wrap input::placeholder{color:var(--ink-3);letter-spacing:.08em;font-weight:400}
+.search-wrap input::placeholder{color:transparent;letter-spacing:.08em;font-weight:400}
 
 .grid{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
@@ -768,7 +772,10 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 /* 响应式 */
 /* 桌面端：社媒栏每个文字上方加红色小方块，方块中心骑在横线上 */
 @media(min-width:821px){
-  .home-socials{margin-bottom:112px}
+  .home-socials{
+    margin-bottom:60px;
+    margin-top:24px;     
+  }
   .social-link{
     position:relative;
     padding:32px 0 8px;
@@ -924,38 +931,58 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   #view-detail{margin-left:0}
 
 
-  /* ----- 排序栏：两个按钮一行等宽，搜索下一行等宽 ----- */
+  /* ----- 排序栏：无边框无底色，仅细线分隔 + 顶部红色横线指示（瑞士风 / 工业感） ----- */
   .toolbar{
     display:flex;
     flex-wrap:wrap;
     width:100%;
     margin-top:26px;
     border:none;
+    background:transparent;
   }
   .tool-label{display:none}
   .sort-wrap{
+    position:relative;
     display:flex;
     width:100%;
     flex:0 0 100%;
     border-top:1px solid var(--line);
-    border-left:1px solid var(--line);
+    border-left:none;
+    border-right:none;
+    border-bottom:none;
+    background:transparent;
+  }
+  /* 红色指示横线：高度 4px，骑在顶部细线上（top:-2px），宽度与位置由 JS 计算 */
+  .sort-slider{
+    top:-2px;
+    left:0;
+    height:4px;
+    background:var(--swiss);
+    z-index:3;
+    opacity:0;
   }
   .sort-wrap button{
     flex:1 1 0;
     min-width:0;
-    padding:12px 8px 13px;
-    align-items:center;
-    border-bottom:1px solid var(--line);
+    padding:16px 0 15px 0;
+    align-items:flex-start;
+    text-align:left;
+    border:none;
+    background:transparent;
   }
+  .sort-wrap button:hover:not(.active){background:transparent}
   .sort-wrap button .zh{
     font-size:0;
-    text-align:center;
+    font-weight:600;
+    text-align:left;
     width:100%;
     line-height:1.2;
+    color:var(--ink-3);
+    transition:color .35s ease;
   }
   .sort-wrap button .zh::before{
-    font-size:13px;
-    font-weight:600;
+    font-size:12.5px;
+    font-weight:inherit;
     letter-spacing:.08em;
   }
   .sort-wrap button[data-sort="date"] .zh::before{content:"时间"}
@@ -965,26 +992,52 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
     font-size:7.5px;
     letter-spacing:.12em;
     line-height:1;
-    margin-top:4px;
-    text-align:center;
+    margin-top:6px;
+    text-align:left;
     color:var(--ink-3);
+    transition:color .35s ease;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
     max-width:100%;
   }
+  /* 激活项：文字加深加粗，小字变瑞士红；不再使用色块背景区分 */
+  .sort-wrap button.active .zh{color:var(--ink);font-weight:700}
+  .sort-wrap button.active .en{color:var(--swiss)}
+  .sort-wrap button:hover:not(.active) .zh{color:var(--ink)}
 
+  /* ----- 搜索栏：去掉外框与占位文字，仅用顶部细线与排序栏分隔 ----- */
   .search-wrap{
     width:100%;
     flex:0 0 100%;
     min-width:0;
-    padding:0 20px;
+    padding:0;
+    border:none;
     border-top:1px solid var(--line);
-    border-left:1px solid var(--line);
-    border-right:1px solid var(--line);
-    border-bottom:1px solid var(--line);
+    background:transparent;
     box-sizing:border-box;
   }
+  .search-wrap:focus-within{background:transparent}
+  .search-wrap .s-icon{
+    display:flex;
+    align-items:center;
+    margin-right:16px;
+    font-size:8.5px;
+  }
+  .search-wrap .s-icon::before{
+    content:'';
+    width:8px;
+    height:8px;
+    margin-right:10px;
+    background:var(--swiss);
+    flex-shrink:0;
+  }
+  .search-wrap input{
+    padding:16px 0;
+    background:transparent;
+    border:none;
+  }
+  .search-wrap input::placeholder{color:transparent}
 
   /* ----- 移动端子分类下拉 ----- */
   .subtabs{display:none !important}
@@ -1144,10 +1197,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   filter: brightness(1);
 }
 
-:root[data-theme="dark"] .subtab.active .zh,
-:root[data-theme="dark"] .sort-wrap button.active .zh{
-  color:#ececec;
-}
+/* 深色模式：激活项文字统一由 var(--ink) / var(--swiss) 控制，无需额外覆盖 */
 
 
 /* 主题切换按钮：空心圆 / 实心圆 */
@@ -1330,7 +1380,6 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   </div>
 
   <div class="toolbar">
-    <span class="tool-label">排序 / Sort</span>
     <div class="sort-wrap" id="sortWrap">
       <div class="sort-slider" id="sortSlider"></div>
       <button data-sort="date" class="active">
@@ -2104,7 +2153,7 @@ function setSub(key){
   renderGrid();
 }
 
-/* 把子分类红色滑块移到当前项 */
+/* 把子分类红色滑块移到当前项（宽度只取文字宽，不含右侧留白） */
 function updateSubSlider(){
   const wrap = document.getElementById('subTabs');
   const slider = document.getElementById('subSlider');
@@ -2116,7 +2165,7 @@ function updateSubSlider(){
   const ar = active.getBoundingClientRect();
   const borderLeft = parseFloat(getComputedStyle(wrap).borderLeftWidth) || 0;
   const x = ar.left - wr.left - borderLeft;
-  const w = ar.width;
+  const w = ar.width - (parseFloat(getComputedStyle(active).paddingRight) || 0);
 
   if (!subSliderInit){
     slider.style.transition = 'none';
@@ -2132,7 +2181,7 @@ function updateSubSlider(){
   }
 }
 
-/* 把排序红色滑块移到当前项 */
+/* 把排序红色滑块移到当前项（宽度只取文字宽，不含右侧留白） */
 function updateSortSlider(){
   const wrap = document.getElementById('sortWrap');
   const slider = document.getElementById('sortSlider');
@@ -2144,7 +2193,7 @@ function updateSortSlider(){
   const ar = active.getBoundingClientRect();
   const borderLeft = parseFloat(getComputedStyle(wrap).borderLeftWidth) || 0;
   const x = ar.left - wr.left - borderLeft;
-  const w = ar.width;
+  const w = ar.width - (parseFloat(getComputedStyle(active).paddingRight) || 0);
 
   if (!sortSliderInit){
     slider.style.transition = 'none';
