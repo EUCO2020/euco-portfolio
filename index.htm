@@ -888,20 +888,24 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   }
   .mobile-cat-drop.open{
     max-height:520px;
-    border-bottom:1px solid var(--line-strong);
   }
   .mobile-cat-drop a{
     display:block;
     padding:15px 20px;
-    border-bottom:1px solid var(--line);
     color:var(--ink);
     text-decoration:none;
     cursor:pointer;
   }
-  .mobile-cat-drop a:last-child{border-bottom:none}
   .mobile-cat-drop a:active{background:var(--hover)}
   .mobile-cat-drop a .zh{font-size:13px;font-weight:700;letter-spacing:.02em}
   .mobile-cat-drop a .en{font-size:9px;letter-spacing:.14em;margin-top:5px;color:var(--ink-3)}
+  .mobile-cat-drop a.current .zh{
+    color: var(--swiss);
+  }
+  .mobile-cat-drop a.current .en{
+    color: var(--swiss);
+    opacity: 0.65;
+  }
 
   /* ----- 悬浮标题栏：index 和 detail 共用 ----- */
   #view-index .head-row,
@@ -1039,58 +1043,100 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   }
   .search-wrap input::placeholder{color:transparent}
 
-  /* ----- 移动端子分类下拉 ----- */
+   /* ----- 移动端子分类下拉 ----- */
   .subtabs{display:none !important}
   .m-subtabs{display:block;margin-top:26px;position:relative}
   .m-subtabs.hidden{display:none}
+  
+  /* 移动端：子分类触发器（去边框与底横线） */
   .m-subtrigger{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    width:100%;
-    padding:14px 18px;
-    border:1px solid var(--line);
-    background:var(--surface);
-    font-family:inherit;
-    color:var(--ink);
-    cursor:pointer;
-    text-align:left;
-    box-sizing:border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 16px 0;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    box-sizing: border-box;
   }
   .m-subtrigger-label{font-size:13px;font-weight:700;letter-spacing:.02em}
   .m-subtrigger-arrow{
     width:16px;height:16px;flex-shrink:0;
-    transition:transform .3s cubic-bezier(.4,0,.2,1);
+    color: inherit; /* 常态跟随父级，即黑色/深色模式下的浅色 */
+    transition: transform .3s cubic-bezier(.4,0,.2,1), color .3s ease;
   }
-  .m-subtrigger.open .m-subtrigger-arrow{transform:rotate(-90deg)}
+  /* 展开时：箭头向下旋转，同时变为 Swiss 红 */
+  .m-subtrigger.open .m-subtrigger-arrow{
+    transform: rotate(-90deg);
+    color: var(--swiss);
+  }
+  
+  /* 移动端：子分类菜单（左侧引入竖线，去底横线） */
   .m-submenu{
-    max-height:0;
-    overflow:hidden;
-    background:var(--surface);
-    border-left:1px solid var(--line);
-    border-right:1px solid var(--line);
-    transition:max-height .32s cubic-bezier(.4,0,.2,1);
+    position: relative;
+    max-height: 0;
+    overflow: hidden;
+    background: transparent;
+    border: none;
+    transition: max-height .32s cubic-bezier(.4,0,.2,1);
   }
-  .m-submenu.open{max-height:520px;border-bottom:1px solid var(--line)}
+  .m-submenu.open{
+    max-height: 520px;
+  }
+  /* 灰色细竖线整体左移 */
+  .m-submenu::before{
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--line);
+    pointer-events: none;
+  }
+
+  /* 移动端：子分类选项（缩进同步左移） */
   .m-subitem{
-    display:block;
-    width:100%;
-    padding:13px 18px;
-    border:none;
-    border-bottom:1px solid var(--line);
-    background:var(--surface);
-    font-family:inherit;
-    color:var(--ink);
-    cursor:pointer;
-    text-align:left;
-    transition:background .2s;
-    box-sizing:border-box;
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 14px 0 14px 20px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    transition: background .2s;
+    box-sizing: border-box;
   }
-  .m-subitem:last-child{border-bottom:none}
   .m-subitem:active{background:var(--hover)}
-  .m-subitem.active{background:var(--ink)}
-  .m-subitem.active .zh{color:var(--surface)}
-.m-subitem.active .en{color:var(--surface);opacity:.55}
+  
+  /* 选中状态：无底色 */
+  .m-subitem.active{
+    background: transparent;
+  }
+  /* 选中状态：文字变成 Swiss 红 */
+  .m-subitem.active .zh{color:var(--swiss)}
+  .m-subitem.active .en{color:var(--swiss); opacity: 0.6} 
+  
+  /* 选中状态的红色小方块（中心骑在 4px 的线上） */
+  .m-subitem.active::before{
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--swiss);
+    pointer-events: none;
+  }
+  
   .m-subitem .zh{font-size:13px;font-weight:600;letter-spacing:.02em}
   .m-subitem .en{font-size:9px;letter-spacing:.14em;margin-top:4px;color:var(--ink-3)}
 
@@ -1796,6 +1842,15 @@ function render(restoreY){
   /* 同步左侧边栏的分类激活状态 */
   document.querySelectorAll('.cat-menu a').forEach(a => {
     a.classList.toggle('current', a.dataset.cat === state.cat);
+  });
+
+  /* 同步移动端下拉菜单的分类激活状态 */
+  document.querySelectorAll('.mobile-cat-drop a').forEach(a => {
+    if (a.dataset.action === 'mhome') {
+      a.classList.toggle('current', state.view === 'home');
+    } else if (a.dataset.cat) {
+      a.classList.toggle('current', state.view !== 'home' && a.dataset.cat === state.cat);
+    }
   });
 
   /* 移动方块到当前分类的位置 */
