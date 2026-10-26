@@ -663,6 +663,8 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .detail-stage{
     order:1;
     padding:66px 20px 24px;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
   }
   /* 移动端去掉外框；宽度跟随图片，图下说明带才能和图片左右边缘对齐 */
   .detail-img{width:auto;max-width:100%;border:0;max-height:calc(100vh - 140px)}
@@ -1296,6 +1298,11 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 .series-bottom.no-series{display:none !important}
 .series-cap{display:none}
 
+/* 系列栏出现时随图片一起淡入，避免"啪"地一下冒出来 */
+@keyframes seriesBarIn{from{opacity:0}to{opacity:1}}
+.series-bottom:not(.no-series){animation:seriesBarIn .5s ease both}
+.series-cap:not(.no-series){animation:seriesBarIn .5s ease both}
+
 .series-row{
   position:relative;
   display:grid;
@@ -1305,8 +1312,18 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 }
 .series-name{
   grid-column:1;justify-self:start;
+  display:flex;align-items:center;gap:8px;
   font-size:12px;font-weight:500;letter-spacing:.14em;line-height:1;
   text-transform:uppercase;color:var(--ink-2);
+  min-width:0;
+}
+.series-kicker{flex:0 0 auto;white-space:nowrap}
+/* 分隔竖线：高度等于大写字母高度（与方块同一档） */
+.series-rule{
+  flex:0 0 auto;width:1px;height:.72em;
+  background:var(--ink-3);
+}
+.series-text{
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 /* 点阵落在图片正中：左右两列等宽，中间列自然居中 */
@@ -1406,15 +1423,20 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 @media(max-width:820px){
   .series-cap{
     display:flex;align-items:center;
-    flex-shrink:0;width:100%;height:28px;box-sizing:border-box;
-    padding:0;
+    flex-shrink:0;height:auto;box-sizing:border-box;
+    margin-top:16px;      /* 图片 → 细线 */
+    padding:16px 0 0;     /* 细线 → 系列栏内容 */
     border-top:1px solid var(--line);
-    background:var(--bg);
+    background:transparent;
   }
-  /* 移动端：文字略小，方块靠右 */
+  .series-cap.no-series{display:none !important}
+  /* 移动端：文字略小，方块略小（间距同步加大，保持步进 13px 不变） */
   .series-cap .series-row{grid-template-columns:1fr auto}
   .series-cap .series-name{font-size:11px;letter-spacing:.12em}
-  .series-cap .series-dots{justify-self:end}
+  .series-cap .series-dots{gap:5px;height:8px;justify-self:end}
+  .series-cap .sdot{width:8px;height:8px}
+  .series-cap .sdot::after{inset:-6px -2.5px}
+  .series-cap .series-fill{width:8px;height:8px}
 }
 
 :root[data-theme="dark"] .sdot{background:#3f3f44}
@@ -1424,6 +1446,8 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
   .detail-img,
   .detail-img img,
   .detail-img .ph{transition:none}
+  .series-bottom:not(.no-series),
+  .series-cap:not(.no-series){animation:none}
 }
 
 
@@ -1631,6 +1655,7 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 
     <div class="detail-stage" id="detailStage">
       <div class="detail-img" id="detailImg"></div>
+      <div class="series-cap no-series" id="seriesCap"></div>
       <div class="series-bottom no-series" id="seriesBottom"></div>
     </div>
 
@@ -2661,7 +2686,7 @@ function seriesRowHTML(s, withNav){
     : '';
 
   return `<span class="series-sr" aria-live="polite">第 ${s.index + 1} 张，共 ${s.total} 张</span>
-    <span class="series-name">${s.en}</span>
+    <span class="series-name"><span class="series-kicker">SERIES</span><span class="series-rule" aria-hidden="true"></span><span class="series-text">${s.en}</span></span>
     <span class="series-dots" role="group" aria-label="系列 ${s.zh}，共 ${s.total} 张">
       <span class="series-fill" aria-hidden="true" style="transform:translateX(${s.index * SERIES_PITCH}px)"></span>
       ${dots}
@@ -2703,17 +2728,65 @@ function updateSeriesRow(row, s){
   if (next) next.disabled = (s.index === s.total - 1);
 }
 
-/* 桌面底栏宽度 = 图片宽度，居中后左右边缘正好与画面边缘对齐
+/* 图片在"最终布局"下的宽度。
+   不直接量 getBoundingClientRect：入场 scale 动画会让它偏小（0.92 倍），
+   面板展开过程中舞台也还在变窄。这里按自然尺寸 + max-height + 最终可用宽度推算，稳定。 */
+function mediaFinalWidth(){
+  const stage = document.getElementById('detailStage');
+  const box = document.getElementById('detailImg');
+  const media = box ? box.querySelector('img, .ph') : null;
+  if (!stage || !box || !media) return 0;
+
+  /* 面板还在展开时，按展开完成后的舞台宽度算 */
+  let panelDelta = 0;
+  const panel = document.getElementById('detailPanel');
+  const panelInner = document.querySelector('.detail-panel-inner');
+  if (panel && panelInner){
+    const targetW = panelInner.offsetWidth;
+    const curW = panel.getBoundingClientRect().width;
+    if (targetW > curW + 0.5) panelDelta = targetW - curW;
+  }
+
+  const cs = getComputedStyle(stage);
+  const padL = parseFloat(cs.paddingLeft) || 0;
+  const padR = parseFloat(cs.paddingRight) || 0;
+  const bcs = getComputedStyle(box);
+  const borderW = (parseFloat(bcs.borderLeftWidth) || 0) + (parseFloat(bcs.borderRightWidth) || 0);
+  const availW = Math.max(0,
+    stage.getBoundingClientRect().width - panelDelta - padL - padR - borderW);
+
+  let w, h, ratio;
+  if (media.tagName === 'IMG' && media.naturalWidth && media.naturalHeight){
+    ratio = media.naturalWidth / media.naturalHeight;
+    w = media.naturalWidth;
+    h = media.naturalHeight;
+  } else {
+    w = media.offsetWidth;
+    h = media.offsetHeight;
+    ratio = h ? w / h : 1;
+  }
+  if (!w || !h) return 0;
+
+  const maxH = parseFloat(getComputedStyle(media).maxHeight);
+  if (isFinite(maxH) && maxH > 0 && h > maxH){
+    h = maxH;
+    w = h * ratio;
+  }
+  if (w > availW) w = availW;
+  return Math.round(w);
+}
+
+/* 底栏 / 说明带宽度 = 图片宽度，居中后左右边缘正好与画面边缘对齐
    （外框左右各 1px，居中计算中相互抵消） */
 function syncSeriesBarWidth(){
-  const bar = document.getElementById('seriesBottom');
-  if (!bar) return;
-  if (!seriesOf(state.workId)){ bar.style.width = ''; return; }
-  const box = document.getElementById('detailImg');
-  const media = box && box.querySelector('img, .ph');
-  if (!media){ bar.style.width = ''; return; }
-  const w = Math.round(media.getBoundingClientRect().width);
-  bar.style.width = w > 0 ? w + 'px' : '';
+  const bottom = document.getElementById('seriesBottom');
+  const cap = document.getElementById('seriesCap');
+
+  const w = seriesOf(state.workId) ? mediaFinalWidth() : 0;
+  const val = w > 0 ? w + 'px' : '';
+
+  if (bottom) bottom.style.width = val;
+  if (cap) cap.style.width = val;
 }
 
 /* 撑满整条竖线后是否会压到右上角返回箭头；是则改用居中缩小布局。
@@ -2780,45 +2853,36 @@ function syncStageLayout(){
   syncCloseAvoid();
 }
 
-/* 桌面：图片下方的底栏；移动：图下的贴边说明带 */
+/* 桌面：图片下方的底栏；移动：图下的说明带。
+   两者都在图片框外层，滑动图片时不会跟着动 */
 function renderSeries(w){
   const s = seriesOf(w.id);
   const box = document.getElementById('detailImg');
   const media = box ? box.querySelector('img, .ph') : null;
   const bottom = document.getElementById('seriesBottom');
+  const cap = document.getElementById('seriesCap');
 
   /* 舞台布局随"是否有系列"切换：有系列才顶端对齐 + 底部栏 */
   const stage = document.getElementById('detailStage');
   if (stage) stage.classList.toggle('has-series', !!s);
 
+  const show = !!(s && media);
+
   /* 图没落位前不显示任何系列元素，避免空框或整条空带闪一下 */
   if (bottom){
-    if (!s || !media){
-      bottom.innerHTML = '';
-      bottom.classList.add('no-series');
-    } else {
-      bottom.classList.remove('no-series');
-      updateSeriesRow(ensureSeriesRow(bottom, s, true), s);
-    }
+    if (!show){ bottom.innerHTML = ''; bottom.classList.add('no-series'); }
+    else { bottom.classList.remove('no-series'); }
+  }
+  if (cap){
+    if (!show){ cap.innerHTML = ''; cap.classList.add('no-series'); }
+    else { cap.classList.remove('no-series'); }
   }
 
-  if (!box){
-    syncStageLayout();
-    return;
+  if (show){
+    if (bottom) updateSeriesRow(ensureSeriesRow(bottom, s, true), s);
+    if (cap) updateSeriesRow(ensureSeriesRow(cap, s, false), s);
   }
 
-  let cap = box.querySelector('.series-cap');
-  if (!s || !media){
-    if (cap) cap.remove();
-    syncStageLayout();
-    return;
-  }
-  if (!cap){
-    cap = document.createElement('div');
-    cap.className = 'series-cap';
-    box.appendChild(cap);
-  }
-  updateSeriesRow(ensureSeriesRow(cap, s, false), s);
   syncStageLayout();
 }
 
@@ -2880,6 +2944,17 @@ function setText(id, v){
   if (el) el.textContent = v;
 }
 
+/* 日期英文写法：2025-03-04 → MARCH 4, 2025 */
+const MONTHS_EN = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE',
+                   'JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+function formatDateEn(iso){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  if (!m) return iso || '';
+  const mon = parseInt(m[2], 10) - 1;
+  if (mon < 0 || mon > 11) return iso;
+  return MONTHS_EN[mon] + ' ' + parseInt(m[3], 10) + ', ' + m[1];
+}
+
 function renderLinks(w){
   const links = [];
   if (w.pixiv){
@@ -2911,7 +2986,7 @@ function fillPanelText(w, dir){
     setText('dCharZh', w.char);
     setText('dCharEn', w.charEn);
     setText('dDateZh', w.date);
-    setText('dDateEn', w.date);
+    setText('dDateEn', formatDateEn(w.date));
     renderLinks(w);
   };
 
@@ -2983,15 +3058,19 @@ function fillStage(w, dir, fromDx){
   const phLabel = (w.charEn || w.char || '?').toUpperCase();
   box.style.background = w.c1;
 
+  /* 打开另一件作品（不是系列翻页）时，先把上一张清掉。
+     否则预加载期间旧图还留在框里，会出现"先显示上一张再换成这张"。 */
+  if (!dir){
+    Array.prototype.slice.call(box.children).forEach(n => n.remove());
+  }
+
   const mount = (useImg) => {
     /* 首次挂载这一帧禁用补间，避免图片"一出现就在缩" */
     const stageEl = document.getElementById('detailStage');
     if (stageEl) stageEl.classList.add('instant');
 
-    /* 只清媒体节点，保留图下说明带（它的红块才能继续滑动） */
-    Array.prototype.slice.call(box.children).forEach(n => {
-      if (!n.classList.contains('series-cap')) n.remove();
-    });
+    /* 清掉上一张媒体（系列栏已在框外，不受影响） */
+    Array.prototype.slice.call(box.children).forEach(n => n.remove());
 
     let node;
     if (useImg){
@@ -3288,6 +3367,7 @@ function bindSeriesControls(root){
 })();
 
 bindSeriesControls(document.getElementById('seriesBottom'));
+bindSeriesControls(document.getElementById('seriesCap'));
 bindSeriesControls(document.getElementById('detailImg'));
 
 /* 详情面板展开动画会改变舞台宽度，结束后重新对齐一次底栏 */
@@ -3360,7 +3440,7 @@ window.addEventListener('resize', () => {
 /* 详情页：点击图片旁边（非图片区域）返回；系列栏与刚滑动过都不响应 */
 document.getElementById('detailStage').addEventListener('click', (e) => {
   if (clickGuard()) return;
-  if (e.target.closest('#seriesBottom')) return;
+  if (e.target.closest('#seriesBottom, #seriesCap')) return;
   requestBack();
 });
 
