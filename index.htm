@@ -1377,6 +1377,9 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 /* 移动端横向拖拽由 JS 接管，纵向滚动仍交给浏览器 */
 .detail-stage{touch-action:pan-y}
 
+/* 拖动/切换时走合成层，避免掉帧 */
+.detail-img{will-change:transform,opacity}
+
 /* 桌面：无系列时以左侧竖线为参考，图片上下端各贴住竖线两端（56px）；
    宽度不够时居中退让。有系列时维持现状：图片顶部对齐标题，系列栏在底部 */
 @media(min-width:821px){
@@ -3012,21 +3015,32 @@ function fillPanelText(w, dir){
 
 let stageAnim = null;
 
+/* 取消舞台上的补间（滑出 / 滑入 / 回弹），避免动画和手指抢 transform */
+function cancelStageAnim(){
+  if (stageAnim){
+    try { stageAnim.cancel(); } catch(err){}
+    stageAnim = null;
+  }
+}
+
 function animateStage(dir, fromDx, swap){
   const box = document.getElementById('detailImg');
   if (!box){ swap(); return; }
 
   const mobile = window.matchMedia('(max-width:820px)').matches;
 
-  if (stageAnim){ try { stageAnim.cancel(); } catch(err){} stageAnim = null; }
+  cancelStageAnim();
 
+  /* 滑出距离大于手指已经拖出的距离，动线才会继续往前，而不是先回弹再淡出 */
+  const dist = mobile ? Math.max(60, Math.abs(fromDx) + 60) : 0;
+  const inDist = mobile ? Math.min(dist, 96) : 0;
   const out = box.animate(
     mobile
       ? [{ transform: 'translateX(' + fromDx + 'px)', opacity: 1 },
-         { transform: 'translateX(' + (-42 * dir) + 'px)', opacity: 0 }]
+         { transform: 'translateX(' + (-dir * dist) + 'px)', opacity: 0 }]
       : [{ transform: 'translateX(0px)', opacity: 1 },
          { transform: 'translateX(' + (-8 * dir) + 'px)', opacity: 0.12 }],
-    { duration: mobile ? 150 : 110, easing: 'cubic-bezier(.22,.9,.24,1)', fill: 'forwards' }
+    { duration: mobile ? 180 : 110, easing: 'cubic-bezier(.22,.9,.24,1)', fill: 'forwards' }
   );
 
   stageAnim = out;
@@ -3036,15 +3050,18 @@ function animateStage(dir, fromDx, swap){
     stageAnim = null;
     try { out.cancel(); } catch(err){}
 
+    /* 清掉拖拽残留的 transform，由入场动画接管，避免动画结束后回跳 */
+    box.style.transform = '';
+
     swap();
 
-    box.animate(
+    stageAnim = box.animate(
       mobile
-        ? [{ transform: 'translateX(' + (42 * dir) + 'px)', opacity: 0 },
+        ? [{ transform: 'translateX(' + (dir * inDist) + 'px)', opacity: 0 },
            { transform: 'translateX(0px)', opacity: 1 }]
         : [{ transform: 'translateX(' + (8 * dir) + 'px)', opacity: 0.12 },
            { transform: 'translateX(0px)', opacity: 1 }],
-      { duration: mobile ? 210 : 200, easing: 'cubic-bezier(.22,.9,.24,1)' }
+      { duration: mobile ? 260 : 200, easing: 'cubic-bezier(.22,.9,.24,1)' }
     );
   }).catch(() => {});
 }
@@ -3245,13 +3262,20 @@ function bindSeriesControls(root){
   if (!stage) return;
 
   let sx = 0, sy = 0, dx = 0, active = false, horiz = false, pid = null;
+  let lastX = 0, lastT = 0, vx = 0;
 
-  const restore = () => {
-    const box = document.getElementById('detailImg');
-    if (box) box.style.transform = '';
-    resetDotsTransition();
-    const cur = WORKS.find(x => x.id === state.workId);
-    if (cur) renderSeries(cur);
+  const boxEl = () => document.getElementById('detailImg');
+
+  /* 未达阈值时回弹，而不是瞬移归位 */
+  const snapBack = (fromDx) => {
+    const box = boxEl();
+    if (!box) return;
+    cancelStageAnim();
+    box.style.transform = '';
+    stageAnim = box.animate(
+      [{ transform: 'translateX(' + fromDx + 'px)' }, { transform: 'translateX(0px)' }],
+      { duration: 260, easing: 'cubic-bezier(.22,.9,.24,1)' }
+    );
   };
 
   stage.addEventListener('pointerdown', e => {
@@ -3260,7 +3284,9 @@ function bindSeriesControls(root){
     if (e.target.closest('.sdot, [data-step], .series-cap, .series-bottom')) return;
 
     sx = e.clientX; sy = e.clientY; dx = 0;
+    lastX = 0; lastT = performance.now(); vx = 0;
     active = true; horiz = false; pid = e.pointerId;
+    cancelStageAnim();
   });
 
   stage.addEventListener('pointermove', e => {
@@ -3269,14 +3295,22 @@ function bindSeriesControls(root){
     const mx = e.clientX - sx, my = e.clientY - sy;
 
     if (!horiz){
-      /* 纵向优先：交给页面滚动 */
-      if (Math.abs(my) > 10 && Math.abs(my) > Math.abs(mx)){ active = false; return; }
-      if (Math.abs(mx) > 10 && Math.abs(mx) > Math.abs(my)){
+      /* 纵向优先：交给页面滚动（阈值放宽，轻微横向也能识别） */
+      if (Math.abs(my) > 8 && Math.abs(my) > Math.abs(mx)){ active = false; return; }
+      if (Math.abs(mx) > 6 && Math.abs(mx) >= Math.abs(my)){
         horiz = true;
         try { stage.setPointerCapture(pid); } catch(err){}
       } else {
         return;
       }
+    }
+
+    /* 速度估算：用于"轻甩一下"也能切换 */
+    const now = performance.now();
+    const dt = now - lastT;
+    if (dt > 10){
+      vx = vx * 0.5 + ((mx - lastX) / dt) * 0.5;
+      lastX = mx; lastT = now;
     }
 
     const s = seriesOf(state.workId);
@@ -3287,7 +3321,7 @@ function bindSeriesControls(root){
     if ((d > 0 && s.index === 0) || (d < 0 && s.index === s.total - 1)) d *= 0.32;
     dx = d;
 
-    const box = document.getElementById('detailImg');
+    const box = boxEl();
     if (box) box.style.transform = `translateX(${d}px)`;
 
     const w = stage.clientWidth || 1;
@@ -3300,30 +3334,45 @@ function bindSeriesControls(root){
     if (!horiz) return;
     horiz = false;
 
-    const box = document.getElementById('detailImg');
     const s = seriesOf(state.workId);
     const w = stage.clientWidth || 1;
-    const th = Math.max(28, w * 0.16);
-    const step = (dx <= -th) ? 1 : (dx >= th ? -1 : 0);
 
-    if (box) box.style.transform = '';
+    /* 距离阈值下调到 16px / 7%，另外速度够快（>0.3px/ms）也算数 */
+    const th = Math.max(16, w * 0.07);
+    /* 松手前停顿过久的，速度作废，避免"拖了又停下"被误判为轻甩 */
+    const idle = performance.now() - lastT;
+    const v = idle > 120 ? 0 : vx;
+    const flick = Math.abs(v) >= 0.3;
+
+    let step = 0;
+    if (dx <= -th || (flick && v < 0 && dx <= -10)) step = 1;
+    else if (dx >= th || (flick && v > 0 && dx >= 10)) step = -1;
+
     resetDotsTransition();
+    const from = dx;
+    dx = 0;
 
     if (s && step && ((step === 1 && s.index < s.total - 1) || (step === -1 && s.index > 0))){
       suppressClicks();
-      stepSeries(step, dx);
+      /* 不在这里清 transform，交给 animateStage 从当前位移接上 */
+      stepSeries(step, from);
     } else {
       suppressClicks();
+      snapBack(from);
       const cur = WORKS.find(x => x.id === state.workId);
       if (cur) renderSeries(cur);
     }
-    dx = 0;
   };
 
   stage.addEventListener('pointerup', finish);
   stage.addEventListener('pointercancel', () => {
     active = false; horiz = false; pid = null;
-    restore();
+    resetDotsTransition();
+    const from = dx;
+    dx = 0;
+    snapBack(from);
+    const cur = WORKS.find(x => x.id === state.workId);
+    if (cur) renderSeries(cur);
   });
 })();
 
