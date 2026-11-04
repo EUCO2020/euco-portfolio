@@ -1458,6 +1458,417 @@ body.intro-soft .home-cats{animation:fadeUp .7s ease .4s both}
 
 
 </style>
+<!-- ===== V2 · 编辑风动态层（样式） 开始 ===== -->
+<style id="v2-css">
+/* ============================================================
+   V2 · 编辑风动态层 / Editorial-Kinetic layer
+   追加在原样式之后：只做排版层级与动效增强，不改动原有结构
+   全部布局性改动都以 html.v2 为开关，JS 失效时自动回落到原版
+   ============================================================ */
+
+:root{
+  --v2-mono: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --v2-ease: cubic-bezier(.16,1,.3,1);
+  --v2-ease-io: cubic-bezier(.65,0,.35,1);
+  --v2-pad: 64px;
+}
+
+/* 关闭原版的 intro 关键帧，改由 v2 的入场编排接管（no-JS 时原版照常） */
+html.v2 body.intro #artistId,
+html.v2 body.intro .hero-tag,
+html.v2 body.intro .hero-email,
+html.v2 body.intro .home-socials,
+html.v2 body.intro .home-cats,
+html.v2 body.intro-soft .hero-tag,
+html.v2 body.intro-soft .hero-email,
+html.v2 body.intro-soft .home-socials,
+html.v2 body.intro-soft .home-cats{ animation: none !important }
+
+@media(max-width:640px){ :root{ --v2-pad: 24px } }
+
+html.v2{ scrollbar-color: var(--ink-3) transparent }
+
+html.v2 ::selection{ background: var(--swiss); color:#fff }
+html.v2 ::-moz-selection{ background: var(--swiss); color:#fff }
+
+html.v2 body{ text-rendering: optimizeLegibility }
+
+/* ------------------------------------------------------------
+   1 · 基础排版：等宽数字、标签换字族、标题断行
+   ------------------------------------------------------------ */
+html.v2 .home-bar,
+html.v2 .head-row,
+html.v2 .card-date,
+html.v2 .toolbar button .en,
+html.v2 .subtab .en,
+html.v2 .home-bar span,
+html.v2 .head-row span{
+  font-family: var(--v2-mono);
+  font-variant-numeric: tabular-nums;
+}
+html.v2 .home-bar,
+html.v2 .head-row{ letter-spacing:.3em }
+
+html.v2 .page-title .zh,
+html.v2 .detail-title .zh,
+html.v2 .card-title .zh,
+html.v2 .cat-label .zh{ text-wrap: balance }
+
+/* ------------------------------------------------------------
+   2 · 首页 Hero：非对称双栏 + 超大字号 + 描边字
+   ------------------------------------------------------------ */
+html.v2 .home-hero{
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: end;
+  align-content: center;
+  column-gap: 56px;
+  row-gap: 0;
+  padding: 36px 0 48px;
+}
+
+html.v2 #artistId{
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: end;
+  margin: 0;
+  display: flow-root;
+  transform-origin: left bottom;
+  will-change: transform;
+}
+
+/* 每行一个遮罩块：字号定在这里，行高/行距都以它为基准 */
+html.v2 #artistId .v2-mi{
+  display: block;
+  font-size: clamp(3rem, 10vw, 8.4rem);
+  line-height: 1;
+  overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: .06em;
+  padding: 0;
+  margin: 0;
+}
+/* 行距：比原来松一点（margin 在裁剪框外，不参与遮罩） */
+html.v2 #artistId .v2-mi + .v2-mi{ margin-top: .1em }
+
+html.v2 #artistId .v2-mi > span{
+  display: block;
+  will-change: transform;
+}
+
+html.v2 #artistId .v2-zh{
+  font-size: 1em;
+  font-weight: 900;
+  letter-spacing: -.055em;
+  line-height: 1.02;
+}
+
+html.v2 #artistId .v2-lat{
+  font-size: .7em;          /* 初始近似比例；JS 会按「乌可」的宽度精确对齐 */
+  font-weight: 800;
+  letter-spacing: -.035em;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.3px var(--ink);
+}
+/* 内层 b 用 inline-block 量宽度：中文/英文两行的字面宽度靠它对齐 */
+html.v2 #artistId .v2-zh b,
+html.v2 #artistId .v2-lat b{
+  display: inline-block;
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+@supports not ((-webkit-text-stroke: 1px currentColor)){
+  html.v2 #artistId .v2-lat{ color: var(--ink) }
+}
+
+/* 右侧文案组（插画/邮箱）：包成一块，桌面上底边对齐 EUCO 字底 */
+html.v2 .v2-hero-side{
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  text-align: right;
+}
+html.v2 .v2-hero-side .hero-tag{ margin: 0 }
+html.v2 .hero-tag .zh{ font-size: 13px; letter-spacing: .1em }
+html.v2 .hero-tag .en{ font-size: 8.5px; letter-spacing: .3em; margin-top: 10px }
+
+html.v2 .hero-email{
+  margin: 0;
+  text-align: right;
+  font-family: var(--v2-mono);
+}
+html.v2 .hero-email .zh{
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  color: var(--ink-2);
+}
+html.v2 .hero-email:hover .zh{ color: var(--swiss) }
+
+@media(max-width:820px){
+  html.v2 .home-hero{
+    grid-template-columns: minmax(0,1fr);
+    column-gap: 0;
+    padding: 34px 0 10px;      /* 下方留白收紧 */
+  }
+  html.v2 #artistId{ grid-column:1; grid-row:1; align-self:start }
+  html.v2 .v2-hero-side{
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    align-items: flex-start;
+    text-align: left;
+    gap: 10px;
+    margin-top: 44px;          /* 与上方姓名的间距加大 */
+  }
+  html.v2 #artistId .v2-mi{ font-size: clamp(3rem, 15.5vw, 5.4rem) }
+}
+
+/* ------------------------------------------------------------
+   3 · 分类格：去掉方框，只保留顶部那条线（与原文件一致）
+       hover 的红色扫底 / 变红保留（移动端完全保持原样）
+   ------------------------------------------------------------ */
+@media(min-width:821px){
+  html.v2 .home-cats{
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  html.v2 .home-cats .cat-card{
+    position: relative;         /* 扫底条定位用 */
+  }
+  html.v2 .home-cats .cat-card::after{
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: var(--swiss);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .55s var(--v2-ease);
+  }
+  html.v2 .home-cats .cat-card:hover::after{ transform: scaleX(1) }
+  html.v2 .home-cats .cat-num{
+    font-family: var(--v2-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  html.v2 .home-cats .cat-card:hover .cat-num,
+  html.v2 .home-cats .cat-card:hover .cat-label .zh{ color: var(--swiss) }
+  html.v2 .home-cats .cat-label .zh{ line-height: 1.35 }
+}
+
+/* ------------------------------------------------------------
+   4 · 卡片：标题扫线 + 入场（编号徽标/内框/字幕条已移除）
+   ------------------------------------------------------------ */
+html.v2 .card{
+  position: relative;
+  --i: 0;
+  transition: transform .5s var(--v2-ease);
+}
+html.v2 .card:hover{ transform: translateY(-6px) }
+
+html.v2 .card-title .zh{
+  display: inline;
+  background-image: linear-gradient(var(--swiss), var(--swiss));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size .45s var(--v2-ease);
+}
+html.v2 .card:hover .card-title .zh{ background-size: 100% 1px }
+
+/* 入场：默认隐藏，IntersectionObserver 加 .on */
+html.v2 .card{
+  opacity: 0;
+  transform: translateY(28px);
+}
+html.v2 .card.on{
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity .7s var(--v2-ease) calc(var(--i) * 42ms),
+    transform .85s var(--v2-ease) calc(var(--i) * 42ms),
+    border-color .3s ease;
+}
+html.v2 .card.on:hover{
+  transform: translateY(-6px);
+  transition: transform .5s var(--v2-ease), opacity .3s ease;
+}
+
+/* ------------------------------------------------------------
+   5 · Index 页：巨型标题 + 计数 + 吸顶工具栏
+   ------------------------------------------------------------ */
+html.v2 .page-title{
+  position: relative;
+  margin-top: 38px;
+  padding-right: 120px;
+}
+html.v2 .page-title .zh{
+  /* 回到原版字号 */
+  font-size: clamp(1.7rem, 3.6vw, 2.7rem);
+  letter-spacing: .01em;
+  line-height: 1.15;
+  font-weight: 800;
+}
+html.v2 .page-title .en{
+  font-size: 9px;
+  letter-spacing: .38em;
+  margin-top: 16px;
+}
+html.v2 .v2-count{
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--v2-mono);
+  font-size: 9px;
+  letter-spacing: .22em;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+html.v2 .v2-count b{
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+@media(max-width:820px){
+  html.v2 .page-title{ padding-right: 0 }
+  html.v2 .v2-count{ display: none }
+}
+
+@media(min-width:821px){
+  html.v2 #view-index .toolbar{
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    background: var(--bg);
+    isolation: isolate;
+  }
+  html.v2 #view-index .toolbar{ transition: box-shadow .3s ease }
+  html.v2 #view-index .toolbar.is-stuck{
+    box-shadow: 0 12px 26px -20px rgba(0,0,0,.6);
+  }
+}
+
+/* Index 页头部入场（依赖 .active 切换重放） */
+@keyframes v2Rise{ from{ opacity:0; transform: translateY(16px) } to{ opacity:1; transform:none } }
+html.v2 #view-index.active .page-title{ animation: v2Rise .75s var(--v2-ease) .04s both }
+html.v2 #view-index.active .subtabs{ animation: v2Rise .75s var(--v2-ease) .12s both }
+html.v2 #view-index.active .toolbar{ animation: v2Rise .75s var(--v2-ease) .18s both }
+
+/* ------------------------------------------------------------
+   6 · 详情页面板文案入场
+   ------------------------------------------------------------ */
+@keyframes v2FadeUp{ from{ opacity:0; transform: translateY(12px) } to{ opacity:1; transform:none } }
+html.v2 .detail-panel.expand .detail-title-row{ animation: v2FadeUp .55s var(--v2-ease) .16s both }
+html.v2 .detail-panel.expand .detail-meta{ animation: v2FadeUp .55s var(--v2-ease) .24s both }
+html.v2 .detail-panel.expand .detail-links{ animation: v2FadeUp .55s var(--v2-ease) .32s both }
+html.v2 .detail-title .zh{ letter-spacing: -.028em; line-height: 1 }
+/* 桌面端去掉右上角的返回箭头（Esc / 侧栏仍可返回） */
+@media(min-width:821px){
+  html.v2 #view-detail.active .detail-close{ display: none !important }
+}
+
+/* ------------------------------------------------------------
+   7 · 全局装饰：颗粒、侧边竖标、滚动进度、自定义光标
+   ------------------------------------------------------------ */
+#v2Grain{
+  position: fixed;
+  inset: 0;
+  z-index: 690;
+  pointer-events: none;
+  opacity: .055;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+html[data-theme="dark"] #v2Grain{ mix-blend-mode: screen; opacity: .07 }
+
+#v2Progress{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: var(--swiss);
+  z-index: 1100;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------
+   8 · 主题切换：圆形扩散（View Transitions）
+   ------------------------------------------------------------ */
+::view-transition-old(root),
+::view-transition-new(root){ animation: none; mix-blend-mode: normal }
+html.v2-theme-wipe::view-transition-new(root){
+  animation: v2ThemeWipe .62s var(--v2-ease) both;
+}
+@keyframes v2ThemeWipe{
+  from{ clip-path: circle(0 at var(--v2-tx,50%) var(--v2-ty,50%)) }
+  to{ clip-path: circle(var(--v2-tr,120vmax) at var(--v2-tx,50%) var(--v2-ty,50%)) }
+}
+
+/* ------------------------------------------------------------
+   9 · 通用入场工具类（JS 打点）
+   ------------------------------------------------------------ */
+html.v2 [data-v2up]{
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .7s var(--v2-ease), transform .9s var(--v2-ease);
+}
+html.v2 [data-v2up].on{ opacity: 1; transform: none }
+
+html.v2 #artistId .v2-mi > span{
+  transform: translateY(calc(100% + .45em));
+  transition: transform 1.05s var(--v2-ease);
+}
+html.v2 #artistId .v2-mi > span.on{ transform: translateY(0) }
+
+/* ------------------------------------------------------------
+   10 · 无障碍：减少动态
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce){
+  html.v2 .card,
+  html.v2 .card.on,
+  html.v2 [data-v2up],
+  html.v2 [data-v2up].on,
+  html.v2 #artistId .v2-mi > span,
+  html.v2 #artistId .v2-mi > span.on{
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  html.v2 #view-index.active .page-title,
+  html.v2 #view-index.active .subtabs,
+  html.v2 #view-index.active .toolbar,
+  html.v2 .detail-panel.expand .detail-title-row,
+  html.v2 .detail-panel.expand .detail-meta,
+  html.v2 .detail-panel.expand .detail-links{
+    animation: none !important;
+    opacity: 1;
+  }
+  #v2Progress{ transition: none }
+  html.v2-theme-wipe::view-transition-new(root){ animation: none !important }
+}
+
+</style>
+<!-- ===== V2 · 编辑风动态层（样式） 结束 ===== -->
 </head>
 <body>
 
@@ -3641,5 +4052,424 @@ render = function(restoreY){
 };
 
 </script>
+<!-- ===== V2 · 编辑风动态层（脚本） 开始 ===== -->
+<script id="v2-js">
+/* ============================================================
+   V2 · 动效层（无依赖）
+   在原有脚本之后运行：只做装饰、入场编排与交互增强，
+   通过包装 renderGrid / render 接入，不改动原有数据与逻辑
+   ============================================================ */
+(function(){
+  'use strict';
+
+  var docEl = document.documentElement;
+  var body = document.body;
+
+  var mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reduce = mqReduce.matches;
+  if (mqReduce.addEventListener){
+    mqReduce.addEventListener('change', function(e){ reduce = e.matches; });
+  }
+  var fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  var booted = false;
+
+  /* ---------- 小工具 ---------- */
+  function el(tag, cls, html){
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  }
+  function all(sel, root){
+    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  }
+  function reflow(){ void body.offsetHeight; }
+
+  /* ---------- 装饰：颗粒 / 侧边竖标 / 滚动进度 ---------- */
+  if (!document.getElementById('v2Grain')){
+    var grain = el('div'); grain.id = 'v2Grain';
+    grain.setAttribute('aria-hidden', 'true');
+    body.appendChild(grain);
+  }
+  var progress = document.getElementById('v2Progress');
+  if (!progress){
+    progress = el('div'); progress.id = 'v2Progress';
+    progress.setAttribute('aria-hidden', 'true');
+    body.appendChild(progress);
+  }
+
+  /* ---------- 首页：标题拆行 ---------- */
+  function splitHero(){
+    var h = document.getElementById('artistId');
+    if (!h || h.dataset.v2split === '1') return;
+    var raw = (h.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!raw) return;
+
+    var m = raw.match(/^([\u3400-\u9fff\uf900-\ufaff\u3040-\u30ff]+)\s*(.*)$/);
+    var zh = m ? m[1] : '';
+    var lat = m ? m[2].trim() : raw;
+
+    h.dataset.v2split = '1';
+    h.textContent = '';
+
+    function line(cls, text){
+      var mi = el('span', 'v2-mi');
+      var sp = el('span', cls);
+      var b = el('b');
+      b.textContent = text;
+      sp.appendChild(b);
+      mi.appendChild(sp);
+      h.appendChild(mi);
+      return sp;
+    }
+    if (zh) line('v2-zh', zh);
+    if (lat) line('v2-lat', lat);
+    h.setAttribute('aria-label', raw);
+  }
+
+  /* ---------- 首页：右侧文案组包成一块（底边对齐用） ---------- */
+  function groupSide(){
+    var hero = document.querySelector('.home-hero');
+    var h = document.getElementById('artistId');
+    if (!hero || !h || hero.querySelector('.v2-hero-side')) return;
+    var tag = hero.querySelector('.hero-tag');
+    var mail = hero.querySelector('.hero-email');
+    if (!tag || !mail) return;
+    var side = el('div', 'v2-hero-side');
+    side.appendChild(tag);
+    side.appendChild(mail);
+    h.parentNode.insertBefore(side, h.nextSibling);
+  }
+
+  /* ---------- 首页：中英两行字面宽度对齐 ---------- */
+  function heroFit(){
+    var zhB = document.querySelector('#artistId .v2-zh b');
+    var lat = document.querySelector('#artistId .v2-lat');
+    var latB = lat ? lat.querySelector('b') : null;
+    if (!zhB || !lat || !latB) return;
+
+    lat.style.fontSize = '';               /* 先回到 CSS 的近似比例 */
+    if (!zhB.getBoundingClientRect().width) return;   /* 视图隐藏时不量 */
+
+    var zw = zhB.getBoundingClientRect().width;
+    var lw = latB.getBoundingClientRect().width;
+    if (!zw || !lw) return;
+
+    /* 负字距会把「墨迹右缘」推到盒子外面，按末字字距回补，
+       对齐的是眼睛看到的左右两条边，而不是排版盒 */
+    var lsZ = parseFloat(window.getComputedStyle(zhB).letterSpacing) || 0;
+    var lsL = parseFloat(window.getComputedStyle(lat).letterSpacing) || 0;
+    zw -= lsZ;
+    lw -= lsL;
+
+    var cur = parseFloat(window.getComputedStyle(lat).fontSize) || 16;
+    /* 字宽随字号线性变化，一次换算即可命中 */
+    lat.style.fontSize = (cur * zw / lw).toFixed(2) + 'px';
+  }
+
+  /* 取 EUCO 的基线 Y（0 宽基线探针）。
+     入场时整行被 translateY(100%) 推下去，所以用「行内块 vs 遮罩块」的位移修正，
+     无论动画进行到哪一帧，量到的都是最终落脚位置。 */
+  function latinBaseline(){
+    var b = document.querySelector('#artistId .v2-lat b');
+    if (!b) return null;
+    var mi = b.parentNode && b.parentNode.parentNode;      /* .v2-lat 的父级 = .v2-mi */
+    var inner = mi ? mi.firstElementChild : null;
+    var probe = el('i');
+    probe.style.cssText =
+      'display:inline-block;width:0;height:0;overflow:hidden;vertical-align:baseline';
+    b.appendChild(probe);
+    var y = probe.getBoundingClientRect().bottom;
+    b.removeChild(probe);
+    if (mi && inner){
+      y -= inner.getBoundingClientRect().bottom - mi.getBoundingClientRect().bottom;
+    }
+    return y;
+  }
+
+  /* ---------- 首页：整行对齐（宽度 + 桌面端右侧文案底边） ---------- */
+  function alignHero(){
+    heroFit();
+
+    var side = document.querySelector('.v2-hero-side');
+    if (!side) return;
+    side.style.transform = '';
+
+    if (!window.matchMedia('(min-width:821px)').matches) return;
+
+    var b = document.querySelector('#artistId .v2-lat b');
+    if (!b || !b.getBoundingClientRect().width) return;
+
+    var base = latinBaseline();
+    var box = side.getBoundingClientRect();
+    if (base == null || !box.height) return;
+
+    var d = box.bottom - base;            /* 目测对齐：字底 = EUCO 基线 */
+    if (!isFinite(d) || Math.abs(d) < 0.5) return;
+    side.style.transform = 'translateY(' + (-d).toFixed(1) + 'px)';
+  }
+
+  /* ---------- 首页入场编排 ---------- */
+  var UP_ORDER = [
+    ['.hero-tag', 300],
+    ['.hero-email', 360],
+    ['.home-socials', 470],
+    ['.home-cats', 540]
+  ];
+
+  function markUpTargets(){
+    UP_ORDER.forEach(function(pair){
+      var n = document.querySelector(pair[0]);
+      if (n && !n.hasAttribute('data-v2up')) n.setAttribute('data-v2up', '');
+    });
+  }
+
+  function homeSeq(fast){
+    var lines = all('#artistId .v2-mi > span');
+    var ups = all('#view-home [data-v2up]');
+    if (!lines.length && !ups.length) return;
+
+    lines.concat(ups).forEach(function(n){
+      n.classList.remove('on');
+      n.style.transitionDelay = '';
+    });
+    reflow();
+
+    if (reduce){
+      lines.concat(ups).forEach(function(n){ n.classList.add('on'); });
+      return;
+    }
+
+    var k = fast ? 0.55 : 1;
+
+    lines.forEach(function(n, i){
+      n.style.transitionDelay = ((60 + i * 90) * k / 1000).toFixed(3) + 's';
+    });
+    UP_ORDER.forEach(function(pair){
+      var n = document.querySelector(pair[0]);
+      if (n) n.style.transitionDelay = (pair[1] * k / 1000).toFixed(3) + 's';
+    });
+
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        lines.forEach(function(n){ n.classList.add('on'); });
+        ups.forEach(function(n){ n.classList.add('on'); });
+      });
+    });
+  }
+
+  /* ---------- 网格入场 ---------- */
+  var io = ('IntersectionObserver' in window)
+    ? new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if (en.isIntersecting){
+            en.target.classList.add('on');
+            io.unobserve(en.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.04 })
+    : null;
+
+  function revealCards(){
+    var grid = document.getElementById('workGrid');
+    if (!grid) return;
+    var cards = all('.card', grid);
+    var instant = (typeof state !== 'undefined') && !!state.search;
+
+    cards.forEach(function(c, i){
+      c.style.setProperty('--i', i < 9 ? i : 0);
+      if (instant || reduce || !io){
+        c.classList.add('on');
+        if (io) io.unobserve(c);
+      } else {
+        io.observe(c);
+      }
+    });
+
+    /* 保险：IO 万一没回调，视口内的卡片也要出来 */
+    if (!instant && !reduce && io){
+      setTimeout(function(){
+        cards.forEach(function(c){
+          if (!c.isConnected || c.classList.contains('on')) return;
+          if (c.getBoundingClientRect().top < window.innerHeight * 1.1) c.classList.add('on');
+        });
+      }, 900);
+    }
+  }
+
+  /* ---------- Index 页：作品计数 ---------- */
+  function updateCount(){
+    var title = document.querySelector('#view-index .page-title');
+    if (!title) return;
+    var badge = title.querySelector('.v2-count');
+    if (!badge){
+      badge = el('span', 'v2-count', '<b>00</b> WORKS');
+      title.appendChild(badge);
+    }
+    var n = all('#workGrid .card').length;
+    badge.querySelector('b').textContent = n ? String(n) : '00';
+  }
+
+  /* ---------- 吸顶工具栏 ---------- */
+  function markSticky(){
+    var tb = document.querySelector('#view-index .toolbar');
+    if (!tb) return;
+    var stuck = (typeof state !== 'undefined') && state.view === 'index' &&
+                tb.getBoundingClientRect().top <= 0.5;
+    tb.classList.toggle('is-stuck', !!stuck);
+  }
+
+  /* ---------- 滚动：进度条 + 吸顶 ---------- */
+  var scrollTick = false;
+  function onScroll(){
+    if (scrollTick) return;
+    scrollTick = true;
+    requestAnimationFrame(function(){
+      scrollTick = false;
+      var h = docEl.scrollHeight - window.innerHeight;
+      var p = h > 0 ? Math.min(1, Math.max(0, window.scrollY / h)) : 0;
+      progress.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+      markSticky();
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ---------- 主题切换：圆形扩散 ---------- */
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    var btn = t && t.closest ? t.closest('[data-theme-toggle]') : null;
+    if (!btn) return;
+    if (reduce || typeof document.startViewTransition !== 'function') return;
+
+    e.stopPropagation();
+    e.preventDefault();
+
+    var cur = docEl.getAttribute('data-theme');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    var r = btn.getBoundingClientRect();
+    var x = r.left + r.width / 2;
+    var y = r.top + r.height / 2;
+    var rad = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+
+    docEl.style.setProperty('--v2-tx', x + 'px');
+    docEl.style.setProperty('--v2-ty', y + 'px');
+    docEl.style.setProperty('--v2-tr', rad + 'px');
+    docEl.classList.add('v2-theme-wipe');
+
+    var vt = document.startViewTransition(function(){
+      docEl.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (err) {}
+      if (typeof updateThemeButtons === 'function') updateThemeButtons();
+    });
+
+    var done = function(){ docEl.classList.remove('v2-theme-wipe'); };
+    if (vt && vt.finished && vt.finished.then) vt.finished.then(done, done);
+    else setTimeout(done, 700);
+  }, true);
+
+  /* ---------- 详情页：Esc 返回（箭头已去掉，留一个看不见的出口） ---------- */
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    if (typeof state === 'undefined' || state.view !== 'detail') return;
+    var lb = document.getElementById('lightbox');
+    if (lb && lb.classList.contains('open')) return;      /* 灯箱开着时交回原逻辑 */
+    var ae = document.activeElement;
+    if (ae && /^(INPUT|TEXTAREA)$/.test(ae.tagName)) return;
+    if (typeof requestBack === 'function') requestBack();
+  }, true);
+
+  /* ---------- 接入原有渲染流程 ---------- */
+  function afterView(){
+    if (typeof state === 'undefined') return;
+    if (state.view === 'home' && booted){
+      homeSeq(true);
+      requestAnimationFrame(alignHero);
+    }
+    requestAnimationFrame(markSticky);
+  }
+
+  function installHooks(){
+    if (typeof renderGrid === 'function'){
+      var _renderGrid = window.renderGrid;
+      window.renderGrid = function(){
+        var out = _renderGrid.apply(this, arguments);
+        try { revealCards(); updateCount(); } catch (err) {
+          all('#workGrid .card').forEach(function(c){ c.classList.add('on'); });
+        }
+        return out;
+      };
+    }
+    if (typeof render === 'function'){
+      var _render = window.render;
+      window.render = function(){
+        var out = _render.apply(this, arguments);
+        try { afterView(); } catch (err) {}
+        return out;
+      };
+    }
+  }
+
+  /* ---------- 启动：钩子优先，失败则完全回落到原版 ---------- */
+  var armed = false;
+  try {
+    installHooks();
+    armed = true;
+  } catch (err) {
+    if (window.console) console.warn('[v2] hooks failed:', err);
+  }
+  if (armed){
+    docEl.classList.add('v2');            /* 先上开关，样式到位后再量尺寸 */
+    try { splitHero(); } catch (err) {}
+    try { groupSide(); } catch (err) {}
+    try { markUpTargets(); } catch (err) {}
+    try { alignHero(); } catch (err) {}
+  }
+
+  function kick(){
+    if (booted) return;
+    booted = true;
+    if (typeof state !== 'undefined' && state.view === 'home') homeSeq(false);
+    try { alignHero(); } catch (err) {}
+    onScroll();
+  }
+
+  if (armed){
+    if (document.readyState === 'complete'){
+      setTimeout(kick, 150);
+    } else {
+      window.addEventListener('load', function(){ setTimeout(kick, 150); });
+    }
+
+    /* 兜底：无论加载状态如何，2.6s 后一定把隐藏元素放出来 */
+    setTimeout(function(){
+      if (!booted) kick();
+      all('#view-home [data-v2up]').forEach(function(n){ n.classList.add('on'); });
+      all('#artistId .v2-mi > span').forEach(function(n){ n.classList.add('on'); });
+    }, 2600);
+  }
+
+  var resizeT = 0;
+  window.addEventListener('resize', function(){
+    markSticky();
+    clearTimeout(resizeT);
+    resizeT = setTimeout(function(){
+      try { alignHero(); } catch (err) {}
+    }, 120);
+  }, { passive: true });
+
+  /* 字体到位后字宽会变，重量一次 */
+  if (document.fonts && document.fonts.ready && document.fonts.ready.then){
+    document.fonts.ready.then(function(){
+      try { alignHero(); } catch (err) {}
+    });
+  }
+  window.addEventListener('load', function(){
+    try { alignHero(); } catch (err) {}
+  });
+
+})();
+
+</script>
+<!-- ===== V2 · 编辑风动态层（脚本） 结束 ===== -->
 </body>
 </html>
